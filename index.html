@@ -1,9 +1,9 @@
-]<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Master: Clean Format Edition</title>
+    <title>Task Master: Full Configuration Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
         :root {
@@ -17,9 +17,8 @@
         h1, h2, h3 { color: var(--primary); font-weight: 800; text-transform: uppercase; margin: 0 0 15px 0; letter-spacing: 1px; }
         .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
         label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 700; text-transform: uppercase; }
-        input, select, textarea { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); box-sizing: border-box; font-family: inherit; }
+        input, select, textarea { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); box-sizing: border-box; font-family: inherit; margin-bottom: 10px; }
         
-        /* Buttons */
         .btn { padding: 14px; border: none; border-radius: 6px; cursor: pointer; font-weight: 800; width: 100%; text-transform: uppercase; transition: 0.2s; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-gold { background: var(--gold); color: black; }
@@ -27,36 +26,19 @@
         .btn-danger { background: var(--accent); color: white; }
         .btn-warning { background: #ca8a04; color: white; }
 
-        /* Inventory */
         .inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .db-box { background: #111; padding: 12px; border-radius: 8px; border: 1px solid var(--border); }
         .chip { display: inline-flex; align-items: center; background: var(--border); padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; margin: 3px; border: 2px solid transparent; cursor: pointer; }
         .chip.active { border-color: var(--primary); background: #2e1a4d; }
 
-        /* FIXED TASK CARD FORMATTING */
         .task-card { 
-            font-size: 1.25rem; 
-            line-height: 1.6; 
-            min-height: 160px; 
-            max-height: 300px;
-            overflow-y: auto;
-            display: flex; 
-            flex-direction: column;
-            justify-content: center; 
-            align-items: center;
-            text-align: center; 
-            padding: 30px; 
-            background: #0a0a0a; 
-            border-radius: 8px; 
-            border-left: 8px solid var(--primary); 
-            margin-bottom: 20px; 
-            box-sizing: border-box;
-            white-space: normal;
-            word-break: break-word;
+            font-size: 1.25rem; line-height: 1.6; min-height: 180px; max-height: 350px; overflow-y: auto;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; padding: 30px; background: #0a0a0a; border-radius: 8px; 
+            border-left: 8px solid var(--primary); margin-bottom: 20px; box-sizing: border-box;
         }
         .item-highlight { color: var(--gold); font-weight: 800; border-bottom: 1px dashed var(--gold); }
 
-        /* Game Elements */
         #game-screen { display: none; }
         .timer-box { text-align: center; margin: 20px 0; padding: 20px; background: #000; border-radius: 8px; border: 3px solid var(--gold); }
         .timer-val { font-size: 5rem; font-weight: 800; color: var(--gold); font-variant-numeric: tabular-nums; line-height: 1; }
@@ -70,9 +52,29 @@
     <div id="setup-screen" class="panel">
         <h1>Engine Configuration</h1>
         <div class="grid-3" style="margin-bottom: 20px;">
-            <div class="form-group"><label>Player A</label><input type="text" id="pa-name" placeholder="Name"></div>
-            <div class="form-group"><label>Player B</label><input type="text" id="pb-name" placeholder="Name"></div>
-            <div class="form-group"><label>Vetos</label><input type="number" id="setup-vetos" value="3"></div>
+            <div class="form-group">
+                <label>Player A</label>
+                <input type="text" id="pa-name" placeholder="Name">
+                <select id="pa-gender">
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="nonbinary">Non-Binary</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Player B</label>
+                <input type="text" id="pb-name" placeholder="Name">
+                <select id="pb-gender">
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="nonbinary">Non-Binary</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Session Limits</label>
+                <input type="number" id="setup-rounds" value="10" placeholder="Total Rounds">
+                <input type="number" id="setup-vetos" value="3" placeholder="Vetos Allowed">
+            </div>
         </div>
 
         <h3>1. Inventory Database</h3>
@@ -82,16 +84,16 @@
             <div>
                 <h3>2. Task Creator</h3>
                 <div class="db-box">
-                    <textarea id="new-task-text" placeholder="Tokens: {dom}, {sub}, [Restraint], [Impact], [Sensory], [Toy], [Gag], [Blindfold]" rows="4"></textarea>
-                    <input type="number" id="new-task-time" placeholder="Duration (Seconds)" style="margin-top:10px;">
-                    <button class="btn btn-outline" style="margin-top:10px;" onclick="Engine.saveCustomTask()">Save Task</button>
+                    <textarea id="new-task-text" placeholder="Tokens: {dom}, {sub}, [Restraint], [Impact], [Sensory], [Toy], [Gag], [Blindfold], [Furniture], [Clothing]" rows="4"></textarea>
+                    <input type="number" id="new-task-time" placeholder="Duration (Seconds)">
+                    <button class="btn btn-outline" onclick="Engine.saveCustomTask()">Save Task</button>
                 </div>
             </div>
             <div>
                 <h3>3. Grand Prizes</h3>
                 <div class="db-box">
                     <input type="text" id="new-prize" placeholder="Reward Description...">
-                    <button class="btn btn-outline" style="margin-top:10px;" onclick="Engine.savePrize()">Add Prize</button>
+                    <button class="btn btn-outline" onclick="Engine.savePrize()">Add Prize</button>
                     <div id="prize-list" style="margin-top:10px;"></div>
                 </div>
             </div>
@@ -103,18 +105,18 @@
         <div class="panel">
             <div class="score-display">
                 <div style="text-align:center"><label id="label-pa">Player A</label><div class="score-num" id="score-pa">0</div></div>
-                <div style="text-align:center"><label>Round</label><div class="score-num" id="ui-round">1</div></div>
+                <div style="text-align:center"><label>Round</label><div class="score-num" id="ui-round">1 / 10</div></div>
                 <div style="text-align:center"><label id="label-pb">Player B</label><div class="score-num" id="score-pb">0</div></div>
             </div>
             <div style="text-align: center; font-weight: 800; color: var(--gold); margin-bottom: 10px; text-transform: uppercase;">
                 Dom: <span id="current-dom-name">?</span> | Vetos: <span id="ui-vetos">3</span>
             </div>
             <div class="timer-box">
-                <div id="phase-name" style="color:var(--primary); font-weight: 800; text-transform: uppercase; margin-bottom:5px;">Awaiting Master</div>
+                <div id="phase-name" style="color:var(--primary); font-weight: 800; text-transform: uppercase; margin-bottom:5px;">Ready</div>
                 <div class="timer-val" id="timer-display">00:00</div>
             </div>
 
-            <div class="task-card" id="task-text">Initializing text layout...</div>
+            <div class="task-card" id="task-text">...</div>
 
             <div id="game-controls">
                 <button class="btn btn-primary" id="timer-btn" onclick="Engine.triggerPhase()">Start Task</button>
@@ -124,7 +126,7 @@
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px;">
                     <button class="btn btn-outline" onclick="Engine.veto()">Veto</button>
-                    <button class="btn btn-warning" id="pause-btn" onclick="Engine.togglePause()">Yellow Card</button>
+                    <button class="btn btn-warning" id="pause-btn" onclick="Engine.togglePause()">Pause</button>
                     <button class="btn btn-danger" onclick="Engine.safeWord()">SAFE WORD (-5)</button>
                 </div>
                 <button class="btn btn-danger" style="margin-top: 15px; background: #7f1d1d;" onclick="Engine.redCard()">RED CARD (STOP)</button>
@@ -136,21 +138,19 @@
 
 <script>
     const Engine = {
-        inventory: JSON.parse(localStorage.getItem('tm_v7_inv')) || { 
+        inventory: JSON.parse(localStorage.getItem('tm_v8_inv')) || { 
             Restraint: [], Impact: [], Sensory: [], Toy: [], Gag: [], Blindfold: [], Furniture: [], Clothing: [] 
         },
-        customTasks: JSON.parse(localStorage.getItem('tm_v7_tasks')) || [],
-        prizes: JSON.parse(localStorage.getItem('tm_v7_prizes')) || [],
-        state: { pa: {n:'', s:0}, pb: {n:'', s:0}, dom: null, sub: null, round: 1, timer: null, currentTask: null, vetos: 3, isPaused: false, timeLeft: 0 },
+        customTasks: JSON.parse(localStorage.getItem('tm_v8_tasks')) || [],
+        prizes: JSON.parse(localStorage.getItem('tm_v8_prizes')) || [],
+        state: { pa: {n:'', s:0, g:''}, pb: {n:'', s:0, g:''}, dom: null, sub: null, round: 1, totalRounds: 10, timer: null, currentTask: null, vetos: 3, isPaused: false, timeLeft: 0 },
 
         init() {
             const ui = document.getElementById('inventory-ui');
             Object.keys(this.inventory).forEach(cat => {
                 const div = document.createElement('div');
                 div.className = 'db-box';
-                div.innerHTML = `<label>${cat}</label>
-                    <input type="text" placeholder="Add..." onkeydown="if(event.key==='Enter') Engine.addItem('${cat}', this)">
-                    <div id="list-${cat}" style="min-height:20px; margin-top:5px;"></div>`;
+                div.innerHTML = `<label>${cat}</label><input type="text" placeholder="Add..." onkeydown="if(event.key==='Enter') Engine.addItem('${cat}', this)"><div id="list-${cat}"></div>`;
                 ui.appendChild(div);
                 this.renderItems(cat);
             });
@@ -166,9 +166,7 @@
         removeItem(cat, idx) { this.inventory[cat].splice(idx, 1); this.save(); this.renderItems(cat); },
         renderItems(cat) {
             document.getElementById(`list-${cat}`).innerHTML = this.inventory[cat].map((item, i) => 
-                `<div class="chip ${item.active ? 'active' : ''}" onclick="Engine.toggleItem('${cat}', ${i})">
-                    ${item.name} <span onclick="event.stopPropagation(); Engine.removeItem('${cat}', ${i})">×</span>
-                </div>`).join('');
+                `<div class="chip ${item.active ? 'active' : ''}" onclick="Engine.toggleItem('${cat}', ${i})">${item.name} <span onclick="event.stopPropagation(); Engine.removeItem('${cat}', ${i})">×</span></div>`).join('');
         },
 
         saveCustomTask() {
@@ -181,33 +179,40 @@
             if(p) { this.prizes.push(p); this.save(); this.renderPrizes(); document.getElementById('new-prize').value = ''; }
         },
         renderPrizes() {
-            document.getElementById('prize-list').innerHTML = this.prizes.map((p, i) => 
-                `<div class="chip">${p} <span onclick="Engine.removePrize(${i})">×</span></div>`).join('');
+            document.getElementById('prize-list').innerHTML = this.prizes.map((p, i) => `<div class="chip">${p} <span onclick="Engine.removePrize(${i})">×</span></div>`).join('');
         },
         removePrize(i) { this.prizes.splice(i, 1); this.save(); this.renderPrizes(); },
         save() {
-            localStorage.setItem('tm_v7_inv', JSON.stringify(this.inventory));
-            localStorage.setItem('tm_v7_tasks', JSON.stringify(this.customTasks));
-            localStorage.setItem('tm_v7_prizes', JSON.stringify(this.prizes));
+            localStorage.setItem('tm_v8_inv', JSON.stringify(this.inventory));
+            localStorage.setItem('tm_v8_tasks', JSON.stringify(this.customTasks));
+            localStorage.setItem('tm_v8_prizes', JSON.stringify(this.prizes));
         },
 
         start() {
             this.state.pa.n = document.getElementById('pa-name').value || "Player A";
+            this.state.pa.g = document.getElementById('pa-gender').value;
             this.state.pb.n = document.getElementById('pb-name').value || "Player B";
+            this.state.pb.g = document.getElementById('pb-gender').value;
+            this.state.totalRounds = parseInt(document.getElementById('setup-rounds').value) || 10;
             this.state.vetos = parseInt(document.getElementById('setup-vetos').value) || 3;
+            
             document.getElementById('label-pa').innerText = this.state.pa.n;
             document.getElementById('label-pb').innerText = this.state.pb.n;
             document.getElementById('ui-vetos').innerText = this.state.vetos;
+            
             if(Math.random() > 0.5) { this.state.dom = this.state.pa; this.state.sub = this.state.pb; } 
             else { this.state.dom = this.state.pb; this.state.sub = this.state.pa; }
+            
             document.getElementById('setup-screen').style.display = 'none';
             document.getElementById('game-screen').style.display = 'block';
             this.drawTask();
         },
 
         drawTask() {
+            if(this.state.round > this.state.totalRounds) { return this.endSession(); }
             this.state.isPaused = false; clearInterval(this.state.timer);
-            const pool = this.customTasks.length > 0 ? this.customTasks : [{text: "[dom] Blindfolds with [Blindfold] and applies [Gag] to gag [sub] then ties wrists behind their back and their ankles togther pulling them into strict hogtie using [Restraint]. [Sub] must remain still for [Time] while [Dom] uses [Sensory] without making a sound or moving.", time: 180}]; this.state.currentTask = pool[Math.floor(Math.random() * pool.length)];
+            const pool = this.customTasks.length > 0 ? this.customTasks : [{text: "{dom} Blindfolds with [Blindfold] and applies [Gag] to gag {sub} then ties wrists behind their back and their ankles togther pulling them into strict hogtie using [Restraint]. [Sub] must remain still for [Time] while [Dom] uses [Sensory] without making a sound or moving.", time: 180}]; this.state.currentTask = pool[Math.floor(Math.random() * pool.length)];
+            this.state.currentTask = pool[Math.floor(Math.random() * pool.length)];
             
             let finalHtml = this.state.currentTask.text
                 .replace(/{dom}/g, `<span style="color:var(--primary); font-weight:800">${this.state.dom.n}</span>`)
@@ -226,6 +231,7 @@
             document.getElementById('task-text').innerHTML = `<div>${finalHtml}</div>`;
             document.getElementById('current-dom-name').innerText = this.state.dom.n;
             document.getElementById('timer-display').innerText = this.fmt(this.state.currentTask.time);
+            document.getElementById('ui-round').innerText = `${this.state.round} / ${this.state.totalRounds}`;
             document.getElementById('timer-btn').style.display = 'block';
             document.getElementById('next-btn').style.display = 'none';
             document.getElementById('resolution-btns').style.display = 'none';
@@ -254,20 +260,27 @@
             if(success) {
                 this.state.sub.s += 1;
                 let temp = this.state.dom; this.state.dom = this.state.sub; this.state.sub = temp;
-                alert(`SUCCESS! +1 point and Role Swap.`);
-            } else { this.state.sub.s -= 1; alert(`FAILURE! -1 point.`); }
+                alert(`SUCCESS! Roles Swapped.`);
+            } else { this.state.sub.s -= 1; alert(`FAILURE! Subversive -1 point.`); }
             this.updateScores(); this.state.round++;
-            document.getElementById('ui-round').innerText = this.state.round;
             document.getElementById('resolution-btns').style.display = 'none';
             document.getElementById('next-btn').style.display = 'block';
         },
 
-        togglePause() { this.state.isPaused = !this.state.isPaused; document.getElementById('pause-btn').innerText = this.state.isPaused ? "RESUME" : "Yellow Card"; },
+        togglePause() { this.state.isPaused = !this.state.isPaused; document.getElementById('pause-btn').innerText = this.state.isPaused ? "RESUME" : "PAUSE"; },
         veto() { if(this.state.vetos > 0) { this.state.vetos--; document.getElementById('ui-vetos').innerText = this.state.vetos; this.drawTask(); } },
-        safeWord() { this.state.sub.s -= 5; this.updateScores(); this.state.isPaused = true; alert("SAFE WORD: Subversive -5 pts. Paused."); },
-        redCard() { clearInterval(this.state.timer); document.body.innerHTML = "<div style='color:white; text-align:center; padding:50px;'><h1>EMERGENCY STOP</h1><button onclick='location.reload()'>Reset Engine</button></div>"; },
+        safeWord() { this.state.sub.s -= 5; this.updateScores(); this.state.isPaused = true; alert("SAFE WORD: Subversive -5 pts. Session Paused."); },
+        redCard() { clearInterval(this.state.timer); document.body.innerHTML = "<div style='color:white; text-align:center; padding:50px;'><h1>EMERGENCY STOP</h1><button onclick='location.reload()'>Restart</button></div>"; },
+        
+        endSession() {
+            let winner = this.state.pa.s > this.state.pb.s ? this.state.pa : (this.state.pb.s > this.state.pa.s ? this.state.pb : null);
+            let prize = this.prizes.length > 0 ? this.prizes[Math.floor(Math.random()*this.prizes.length)] : "A night of choice";
+            let msg = winner ? `${winner.n} wins the session!` : "It's a draw!";
+            document.getElementById('game-screen').innerHTML = `<div class='panel' style='text-align:center'><h1>Session Complete</h1><h2>${msg}</h2><p>Reward: <strong>${prize}</strong></p><button class='btn btn-primary' onclick='location.reload()'>New Session</button></div>`;
+        },
+
         updateScores() { document.getElementById('score-pa').innerText = this.state.pa.s; document.getElementById('score-pb').innerText = this.state.pb.s; },
-        fmt: (s) => `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`
+        fmt: (s) => `${Math.floor(s/60)}:${(Math.abs(s)%60).toString().padStart(2,'0')}`
     };
     Engine.init();
 </script>
