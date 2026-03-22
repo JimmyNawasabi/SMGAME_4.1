@@ -1,41 +1,67 @@
-<!DOCTYPE html>
+]<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Master: Performance Edition</title>
+    <title>Task Master: Clean Format Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
         :root {
             --bg: #09090b; --surface: #18181b; --border: #27272a;
             --primary: #8b5cf6; --accent: #f43f5e; --gold: #fbbf24;
-            --text: #f4f4f5; --text-muted: #a1a1aa; --success: #22c55e;
+            --text: #f4f4f5; --text-muted: #a1a1aa;
         }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; display: flex; justify-content: center; }
         .app-container { width: 100%; max-width: 1000px; }
         .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.7); }
-        h1, h2, h3 { color: var(--primary); font-weight: 800; text-transform: uppercase; margin-top: 0; letter-spacing: 1px; }
+        h1, h2, h3 { color: var(--primary); font-weight: 800; text-transform: uppercase; margin: 0 0 15px 0; letter-spacing: 1px; }
         .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
         label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 700; text-transform: uppercase; }
         input, select, textarea { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); box-sizing: border-box; font-family: inherit; }
+        
+        /* Buttons */
         .btn { padding: 14px; border: none; border-radius: 6px; cursor: pointer; font-weight: 800; width: 100%; text-transform: uppercase; transition: 0.2s; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-gold { background: var(--gold); color: black; }
         .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
         .btn-danger { background: var(--accent); color: white; }
         .btn-warning { background: #ca8a04; color: white; }
+
+        /* Inventory */
         .inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .db-box { background: #111; padding: 12px; border-radius: 8px; border: 1px solid var(--border); }
         .chip { display: inline-flex; align-items: center; background: var(--border); padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; margin: 3px; border: 2px solid transparent; cursor: pointer; }
         .chip.active { border-color: var(--primary); background: #2e1a4d; }
-        .chip span { margin-left: 8px; color: var(--accent); font-weight: 900; }
+
+        /* FIXED TASK CARD FORMATTING */
+        .task-card { 
+            font-size: 1.25rem; 
+            line-height: 1.6; 
+            min-height: 160px; 
+            max-height: 300px;
+            overflow-y: auto;
+            display: flex; 
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center;
+            text-align: center; 
+            padding: 30px; 
+            background: #0a0a0a; 
+            border-radius: 8px; 
+            border-left: 8px solid var(--primary); 
+            margin-bottom: 20px; 
+            box-sizing: border-box;
+            white-space: normal;
+            word-break: break-word;
+        }
+        .item-highlight { color: var(--gold); font-weight: 800; border-bottom: 1px dashed var(--gold); }
+
+        /* Game Elements */
         #game-screen { display: none; }
         .timer-box { text-align: center; margin: 20px 0; padding: 20px; background: #000; border-radius: 8px; border: 3px solid var(--gold); }
-        .timer-val { font-size: 5rem; font-weight: 800; color: var(--gold); font-variant-numeric: tabular-nums; }
+        .timer-val { font-size: 5rem; font-weight: 800; color: var(--gold); font-variant-numeric: tabular-nums; line-height: 1; }
         .score-display { display: flex; justify-content: space-around; background: #000; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border); }
         .score-num { font-size: 1.8rem; font-weight: 800; color: var(--primary); }
-        .task-card { font-size: 1.4rem; line-height: 1.6; min-height: 120px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 25px; background: #0a0a0a; border-radius: 8px; border-left: 8px solid var(--primary); margin-bottom: 20px; }
-        .item-highlight { color: var(--gold); font-weight: 800; text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -44,21 +70,9 @@
     <div id="setup-screen" class="panel">
         <h1>Engine Configuration</h1>
         <div class="grid-3" style="margin-bottom: 20px;">
-            <div class="form-group">
-                <label>Player A</label>
-                <input type="text" id="pa-name" placeholder="Name">
-                <select id="pa-gender"><option value="male">Male</option><option value="female">Female</option><option value="nb">Non-Binary</option></select>
-            </div>
-            <div class="form-group">
-                <label>Player B</label>
-                <input type="text" id="pb-name" placeholder="Name">
-                <select id="pb-gender"><option value="male">Male</option><option value="female">Female</option><option value="nb">Non-Binary</option></select>
-            </div>
-            <div class="form-group">
-                <label>Vetos & Rounds</label>
-                <input type="number" id="setup-rounds" value="10">
-                <input type="number" id="setup-vetos" value="3" style="margin-top:5px;">
-            </div>
+            <div class="form-group"><label>Player A</label><input type="text" id="pa-name" placeholder="Name"></div>
+            <div class="form-group"><label>Player B</label><input type="text" id="pb-name" placeholder="Name"></div>
+            <div class="form-group"><label>Vetos</label><input type="number" id="setup-vetos" value="3"></div>
         </div>
 
         <h3>1. Inventory Database</h3>
@@ -68,7 +82,7 @@
             <div>
                 <h3>2. Task Creator</h3>
                 <div class="db-box">
-                    <textarea id="new-task-text" placeholder="Tokens: {dom}, {sub}, [Restraint], [Impact], [Sensory], [Toy], [Gag], [Blindfold]" rows="3"></textarea>
+                    <textarea id="new-task-text" placeholder="Tokens: {dom}, {sub}, [Restraint], [Impact], [Sensory], [Toy], [Gag], [Blindfold]" rows="4"></textarea>
                     <input type="number" id="new-task-time" placeholder="Duration (Seconds)" style="margin-top:10px;">
                     <button class="btn btn-outline" style="margin-top:10px;" onclick="Engine.saveCustomTask()">Save Task</button>
                 </div>
@@ -76,7 +90,7 @@
             <div>
                 <h3>3. Grand Prizes</h3>
                 <div class="db-box">
-                    <input type="text" id="new-prize" placeholder="Winner's Reward...">
+                    <input type="text" id="new-prize" placeholder="Reward Description...">
                     <button class="btn btn-outline" style="margin-top:10px;" onclick="Engine.savePrize()">Add Prize</button>
                     <div id="prize-list" style="margin-top:10px;"></div>
                 </div>
@@ -96,10 +110,12 @@
                 Dom: <span id="current-dom-name">?</span> | Vetos: <span id="ui-vetos">3</span>
             </div>
             <div class="timer-box">
-                <div id="phase-name" style="color:var(--primary); font-weight: 800; text-transform: uppercase;">Awaiting Master</div>
+                <div id="phase-name" style="color:var(--primary); font-weight: 800; text-transform: uppercase; margin-bottom:5px;">Awaiting Master</div>
                 <div class="timer-val" id="timer-display">00:00</div>
             </div>
-            <div class="task-card" id="task-text">Initializing...</div>
+
+            <div class="task-card" id="task-text">Initializing text layout...</div>
+
             <div id="game-controls">
                 <button class="btn btn-primary" id="timer-btn" onclick="Engine.triggerPhase()">Start Task</button>
                 <div class="grid-3" id="resolution-btns" style="display:none; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -120,11 +136,11 @@
 
 <script>
     const Engine = {
-        inventory: JSON.parse(localStorage.getItem('tm_v6_inv')) || { 
+        inventory: JSON.parse(localStorage.getItem('tm_v7_inv')) || { 
             Restraint: [], Impact: [], Sensory: [], Toy: [], Gag: [], Blindfold: [], Furniture: [], Clothing: [] 
         },
-        customTasks: JSON.parse(localStorage.getItem('tm_v6_tasks')) || [],
-        prizes: JSON.parse(localStorage.getItem('tm_v6_prizes')) || [],
+        customTasks: JSON.parse(localStorage.getItem('tm_v7_tasks')) || [],
+        prizes: JSON.parse(localStorage.getItem('tm_v7_prizes')) || [],
         state: { pa: {n:'', s:0}, pb: {n:'', s:0}, dom: null, sub: null, round: 1, timer: null, currentTask: null, vetos: 3, isPaused: false, timeLeft: 0 },
 
         init() {
@@ -170,9 +186,9 @@
         },
         removePrize(i) { this.prizes.splice(i, 1); this.save(); this.renderPrizes(); },
         save() {
-            localStorage.setItem('tm_v6_inv', JSON.stringify(this.inventory));
-            localStorage.setItem('tm_v6_tasks', JSON.stringify(this.customTasks));
-            localStorage.setItem('tm_v6_prizes', JSON.stringify(this.prizes));
+            localStorage.setItem('tm_v7_inv', JSON.stringify(this.inventory));
+            localStorage.setItem('tm_v7_tasks', JSON.stringify(this.customTasks));
+            localStorage.setItem('tm_v7_prizes', JSON.stringify(this.prizes));
         },
 
         start() {
@@ -191,26 +207,23 @@
 
         drawTask() {
             this.state.isPaused = false; clearInterval(this.state.timer);
-            const pool = this.customTasks.length > 0 ? this.customTasks : [{text: "[dom] Blindfolds with [Blindfold] and applies [Gag] to gag [sub] then ties wrists behind their back and their ankles togther pulling them into strict hogtie using [Restraint]. [Sub] must remain still for [Time] while [Dom] uses [Sensory] without making a sound or moving.", time: 180}];
-            this.state.currentTask = pool[Math.floor(Math.random() * pool.length)];
+            const pool = this.customTasks.length > 0 ? this.customTasks : [{text: "[dom] Blindfolds with [Blindfold] and applies [Gag] to gag [sub] then ties wrists behind their back and their ankles togther pulling them into strict hogtie using [Restraint]. [Sub] must remain still for [Time] while [Dom] uses [Sensory] without making a sound or moving.", time: 180}]; this.state.currentTask = pool[Math.floor(Math.random() * pool.length)];
             
             let finalHtml = this.state.currentTask.text
-                .replace(/{dom}/g, `<span style="color:var(--primary)">${this.state.dom.n}</span>`)
-                .replace(/{sub}/g, `<span style="color:var(--primary)">${this.state.sub.n}</span>`)
+                .replace(/{dom}/g, `<span style="color:var(--primary); font-weight:800">${this.state.dom.n}</span>`)
+                .replace(/{sub}/g, `<span style="color:var(--primary); font-weight:800">${this.state.sub.n}</span>`)
                 .replace(/\[Time\]/g, this.fmt(this.state.currentTask.time));
 
             Object.keys(this.inventory).forEach(cat => {
                 const activeItems = this.inventory[cat].filter(item => item.active);
                 const placeholder = `[${cat}]`;
                 if (finalHtml.includes(placeholder)) {
-                    const chosenItem = activeItems.length > 0 
-                        ? activeItems[Math.floor(Math.random() * activeItems.length)].name 
-                        : `(No ${cat})`;
+                    const chosenItem = activeItems.length > 0 ? activeItems[Math.floor(Math.random() * activeItems.length)].name : `(No ${cat})`;
                     finalHtml = finalHtml.split(placeholder).join(`<span class="item-highlight">${chosenItem}</span>`);
                 }
             });
 
-            document.getElementById('task-text').innerHTML = finalHtml;
+            document.getElementById('task-text').innerHTML = `<div>${finalHtml}</div>`;
             document.getElementById('current-dom-name').innerText = this.state.dom.n;
             document.getElementById('timer-display').innerText = this.fmt(this.state.currentTask.time);
             document.getElementById('timer-btn').style.display = 'block';
@@ -232,7 +245,7 @@
                 if(!this.state.isPaused) {
                     this.state.timeLeft--;
                     document.getElementById('timer-display').innerText = this.fmt(this.state.timeLeft);
-                    if(this.state.timeLeft <= 0) { clearInterval(this.state.timer); document.getElementById('timer-display').innerText = "TIME UP"; }
+                    if(this.state.timeLeft <= 0) { clearInterval(this.state.timer); document.getElementById('timer-display').innerText = "00:00"; }
                 }
             }, 1000);
         },
@@ -241,11 +254,8 @@
             if(success) {
                 this.state.sub.s += 1;
                 let temp = this.state.dom; this.state.dom = this.state.sub; this.state.sub = temp;
-                alert(`Success! Roles Swapped. ${this.state.dom.n} is now the Master.`);
-            } else { 
-                this.state.sub.s -= 1;
-                alert(`Failure. ${this.state.sub.n} loses 1 point.`);
-            }
+                alert(`SUCCESS! +1 point and Role Swap.`);
+            } else { this.state.sub.s -= 1; alert(`FAILURE! -1 point.`); }
             this.updateScores(); this.state.round++;
             document.getElementById('ui-round').innerText = this.state.round;
             document.getElementById('resolution-btns').style.display = 'none';
@@ -254,12 +264,7 @@
 
         togglePause() { this.state.isPaused = !this.state.isPaused; document.getElementById('pause-btn').innerText = this.state.isPaused ? "RESUME" : "Yellow Card"; },
         veto() { if(this.state.vetos > 0) { this.state.vetos--; document.getElementById('ui-vetos').innerText = this.state.vetos; this.drawTask(); } },
-        safeWord() { 
-            this.state.sub.s -= 5; 
-            this.updateScores(); 
-            this.state.isPaused = true; 
-            alert("SAFE WORD: Subversive loses 5 points. Check in with your partner."); 
-        },
+        safeWord() { this.state.sub.s -= 5; this.updateScores(); this.state.isPaused = true; alert("SAFE WORD: Subversive -5 pts. Paused."); },
         redCard() { clearInterval(this.state.timer); document.body.innerHTML = "<div style='color:white; text-align:center; padding:50px;'><h1>EMERGENCY STOP</h1><button onclick='location.reload()'>Reset Engine</button></div>"; },
         updateScores() { document.getElementById('score-pa').innerText = this.state.pa.s; document.getElementById('score-pb').innerText = this.state.pb.s; },
         fmt: (s) => `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`
