@@ -191,7 +191,7 @@
 
         drawTask() {
             this.state.isPaused = false; clearInterval(this.state.timer);
-            const pool = this.customTasks.length > 0 ? this.customTasks : [{text: "{dom} Blindfolds with [Blindfold] and applies [Gag} to gag [Sub]then ties wrists behind the back and ankles togther pulling them into strict hog tie using [Restraint]. [Sub} must remain still for [Time] while [Dom] uses [Sensaory] without making a sound or moving.", time: 180}];
+            const pool = this.customTasks.length > 0 ? this.customTasks : [{text: "[dom] Blindfolds with [Blindfold] and applies [Gag] to gag [Sub]then ties wrists behind their back and their ankles togther pulling them into strict hogtie using [Restraint]. [Sub] must remain still for [Time] while [Dom] uses [Sensory] without making a sound or moving.", time: 180}];
             this.state.currentTask = pool[Math.floor(Math.random() * pool.length)];
             
             let finalHtml = this.state.currentTask.text
