@@ -190,7 +190,7 @@
 
         drawTask() {
             this.state.isPaused = false; clearInterval(this.state.timer);
-            const pool = this.customTasks.length > 0 ? this.customTasks : [{text: "{dom} applies [Restraint] while {sub} remains still for [Time].", time: 180}];
+            const pool = this.customTasks.length > 0 ? this.customTasks : [{text: "{dom} ties {sub} gags with {Gag} and blindfolds {sub} with {Blindfold} then ties wrists behind their back and ankles togther pulling them into a strict hogtie with [Restraint] while {sub} remains still for [Time].", time: 180}];
             this.state.currentTask = pool[Math.floor(Math.random() * pool.length)];
             let html = this.state.currentTask.text.replace(/{dom}/g, this.state.dom.n).replace(/{sub}/g, this.state.sub.n).replace(/\[Time\]/g, this.fmt(this.state.currentTask.time));
             Object.keys(this.inventory).forEach(cat => {
