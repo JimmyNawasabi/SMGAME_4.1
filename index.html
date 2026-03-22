@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Master: Professional Session Engine</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        
+        :root {
+            --bg: #09090b; --surface: #18181b; --border: #27272a;
+            --primary: #8b5cf6; --primary-hover: #7c3aed;
+            --text: #f4f4f5; --text-muted: #a1a1aa;
+            --accent: #f43f5e; --warning: #eab308; --danger: #ef4444;
+            --success: #22c55e;
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .app-container { width: 100%; max-width: 800px; }
+        .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        h1, h2, h3 { color: var(--text); margin-top: 0; }
+        h1 { color: var(--primary); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+        
+        /* Grid & Forms */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; }
+        input, select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); box-sizing: border-box; font-family: 'Inter', sans-serif; transition: border-color 0.2s; }
+        input:focus, select:focus { outline: none; border-color: var(--primary); }
+        
+        /* Buttons */
+        .btn { padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; transition: all 0.2s; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 0.5px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: black; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover { background: var(--border); }
+        
+        /* Inventory Chips */
+        .inv-category { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+        .chip { display: inline-flex; align-items: center; background: var(--border); padding: 4px 10px; border-radius: 16px; font-size: 0.8rem; margin: 4px; border: 1px solid transparent; }
+        .chip span { margin-left: 8px; color: var(--text-muted); cursor: pointer; font-weight: bold; }
+        .chip span:hover { color: var(--accent); }
+
+        /* Game Screen */
+        #game-screen { display: none; }
+        .header-bar { display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 20px; font-weight: 600; color: var(--text-muted); }
+        .task-display { font-size: 1.25rem; line-height: 1.6; min-height: 150px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 20px; background: var(--bg); border-radius: 8px; border-left: 4px solid var(--primary); margin-bottom: 20px; }
+        .dynamic-item { color: var(--primary); font-weight: 800; }
+        .player-name { color: var(--accent); font-weight: 600; }
+        .timer { font-size: 4rem; font-weight: 800; text-align: center; color: var(--text); margin: 20px 0; font-variant-numeric: tabular-nums; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div id="setup-screen" class="panel">
+        <h1>Session Configuration</h1>
+        
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Lead Player (Dom)</label>
+                <input type="text" id="p1-name" placeholder="Name or Nickname" style="margin-bottom: 8px;">
+                <select id="p1-title">
+                    <option value="Master">Master (Male/Neutral)</option>
+                    <option value="Sir">Sir (Male)</option>
+                    <option value="Mistress">Mistress (Female)</option>
+                    <option value="Ma'am">Ma'am (Female)</option>
+                    <option value="Dom">Dom (Neutral)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Follow Player (Sub)</label>
+                <input type="text" id="p2-name" placeholder="Name or Nickname" style="margin-bottom: 8px;">
+                <select id="p2-title">
+                    <option value="sub">sub (Neutral)</option>
+                    <option value="boy">boy (Male)</option>
+                    <option value="girl">girl (Female)</option>
+                    <option value="pet">pet (Neutral)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Session Length</label>
+            <input type="number" id="rounds" value="10" min="1" max="50">
+        </div>
+
+        <hr style="border-color: var(--border); margin: 24px 0;">
+
+        <label>Tool Inventory (Adds realism to tasks)</label>
+        <div class="grid-2" id="inventory-ui">
+            </div>
+
+        <hr style="border-color: var(--border); margin: 24px 0;">
+
+        <label>Add Custom Content (Saved for future)</label>
+        <div class="grid-2">
+            <div>
+                <input type="text" id="custom-task" placeholder="Task (use {dom}, {sub}, [Toys] tags)" style="margin-bottom: 8px;">
+                <input type="number" id="custom-time" placeholder="Seconds" style="margin-bottom: 8px;">
+                <button class="btn btn-outline" onclick="Engine.addCustomTask()">Save Task to DB</button>
+            </div>
+            <div>
+                <input type="text" id="custom-prize" placeholder="Grand Prize (e.g. Full Massage)" style="margin-bottom: 8px;">
+                <button class="btn btn-outline" onclick="Engine.addPrize()">Save Prize</button>
+                <div id="prize-count" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 8px;"></div>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" style="margin-top: 24px; padding: 16px; font-size: 1.1rem;" onclick="Engine.start()">Initialize Session</button>
+    </div>
+
+    <div id="game-screen" class="panel">
+        <div class="header-bar">
+            <span id="ui-round">Round 1 / 10</span>
+            <span id="ui-players">Master & sub</span>
+            <span id="ui-vetos" style="color: var(--accent);">Vetos: 3</span>
+        </div>
+
+        <div class="task-display" id="task-text">Awaiting the first command.</div>
+        <div class="timer" id="timer-display">00:00</div>
+
+        <div class="grid-2" style="margin-bottom: 16px;">
+            <button class="btn btn-primary" id="btn-next" onclick="Engine.drawTask()">Generate Task</button>
+            <button class="btn btn-outline" id="btn-veto" onclick="Engine.veto()">Veto Task</button>
+        </div>
+        
+        <div class="grid-2">
+            <button class="btn btn-warning" onclick="Engine.yellowCard()">Yellow Card (Pause)</button>
+            <button class="btn btn-danger" onclick="Engine.redCard()">Red Card (Stop)</button>
+        </div>
+        
+        <button class="btn btn-outline" style="margin-top: 16px; border-color: var(--danger); color: var(--danger);" onclick="Engine.deleteCurrentTask()">Delete Task Permanently</button>
+    </div>
+</div>
+
+<script>
+    // Core Task Database (Optimized for context limits but comprehensive in mechanics)
+    const defaultTasks = [
+        { text: "{dom}, tie {sub}’s wrists to ankles in a tight hogtie using **[Restraints]**. Apply **[Gags]**.", time: 420 },
+        { text: "The Traditional Box: {dom}, tie {sub}'s arms in a box tie using **[Restraints]**. Must sit perfectly upright.", time: 480 },
+        { text: "The Pinball Effect: Apply **[Blindfolds]**. {dom} uses **[Impact]**, **[Sensation]**, and **[Toys]** randomly.", time: 300 },
+        { text: "Thermal Whiplash: {dom}, use **[Sensation]** (ice) and **[Sensation]** (warmth) simultaneously.", time: 240 },
+        { text: "The 10-Second Blitz: {dom}, use every tool in the kit for 10 seconds each in random order.", time: 200 },
+        { text: "The Rhythm of Regret: Justice: 10 strikes of **[Impact]**. Mercy: {dom} massages area for 2 mins.", time: 300 },
+        { text: "The Marking: Justice: {dom} marks 3 spots with **[Sensation]**. Mercy: Licks skin clean.", time: 300 },
+        { text: "The Blind Unweaving: Bind wrists in front with **[Restraints]**. Apply **[Blindfolds]**. {sub} unties by touch alone.", time: 300 },
+        { text: "The Knot Count: {dom}, tie 10 knots in **[Restraints]**. {sub} must untie every knot using only teeth.", time: 360 },
+        { text: "The Sensory Peak: {dom}, use **[Toys]** to bring {sub} to the brink, then swap for **[Sensation]** (ice).", time: 360 },
+        { text: "The Single Leg Suspension: {dom}, tie one leg and lift foot 6 inches using **[Restraints]**. {sub} must balance.", time: 240 },
+        { text: "The Formal Strike: Justice: 15 lashes with **[Impact]**. {sub} must maintain posture.", time: 360 }
+    ];
+
+    const AudioEngine = {
+        play(type) {
+            const urls = {
+                click: 'https://actions.google.com/sounds/v1/ui/button_click.ogg',
+                alert: 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg',
+                stop: 'https://actions.google.com/sounds/v1/alarms/mechanical_clock_ring.ogg',
+                veto: 'https://actions.google.com/sounds/v1/swish/air_swoosh.ogg'
+            };
+            new Audio(urls[type]).play().catch(e => console.log("Audio play blocked by browser interaction policy"));
+        }
+    };
+
+    const Engine = {
+        tasks: JSON.parse(localStorage.getItem('tm_tasks')) || defaultTasks,
+        prizes: JSON.parse(localStorage.getItem('tm_prizes')) || [],
+        inventory: JSON.parse(localStorage.getItem('tm_inv')) || { Restraints: [], Impact: [], Sensation: [], Toys: [], Gags: [], Blindfolds: [] },
+        
+        state: { round: 0, maxRounds: 10, vetos: 3, timerId: null, isPaused: false, currentTask: null },
+        players: { dName: '', dTitle: '', sName: '', sTitle: '' },
+
+        init() {
+            const ui = document.getElementById('inventory-ui');
+            Object.keys(this.inventory).forEach(cat => {
+                const div = document.createElement('div');
+                div.className = 'inv-category';
+                div.innerHTML = `
+                    <label>${cat}</label>
+                    <input type="text" placeholder="Add ${cat}..." onkeydown="if(event.key==='Enter') Engine.addInv('${cat}', this)">
+                    <div id="list-${cat}"></div>
+                `;
+                ui.appendChild(div);
+                this.renderInv(cat);
+            });
+            document.getElementById('prize-count').innerText = `${this.prizes.length} Prizes Saved`;
+        },
+
+        addInv(cat, input) {
+            if (!input.value.trim()) return;
+            this.inventory[cat].push(input.value.trim());
+            input.value = '';
+            this.saveData();
+            this.renderInv(cat);
+        },
+
+        removeInv(cat, idx) {
+            this.inventory[cat].splice(idx, 1);
+            this.saveData();
+            this.renderInv(cat);
+        },
+
+        renderInv(cat) {
+            document.getElementById(`list-${cat}`).innerHTML = this.inventory[cat].map((item, i) => 
+                `<div class="chip">${item}<span onclick="Engine.removeInv('${cat}', ${i})">×</span></div>`
+            ).join('');
+        },
+
+        addCustomTask() {
+            const t = document.getElementById('custom-task').value;
+            const s = document.getElementById('custom-time').value;
+            if (t) {
+                this.tasks.push({ text: t, time: parseInt(s) || 300 });
+                this.saveData();
+                document.getElementById('custom-task').value = '';
+                alert("Task Added to Database!");
+            }
+        },
+
+        addPrize() {
+            const p = document.getElementById('custom-prize').value;
+            if (p) {
+                this.prizes.push(p);
+                this.saveData();
+                document.getElementById('custom-prize').value = '';
+                document.getElementById('prize-count').innerText = `${this.prizes.length} Prizes Saved`;
+            }
+        },
+
+        saveData() {
+            localStorage.setItem('tm_tasks', JSON.stringify(this.tasks));
+            localStorage.setItem('tm_prizes', JSON.stringify(this.prizes));
+            localStorage.setItem('tm_inv', JSON.stringify(this.inventory));
+        },
+
+        start() {
+            this.players.dName = document.getElementById('p1-name').value || "Dom";
+            this.players.dTitle = document.getElementById('p1-title').value;
+            this.players.sName = document.getElementById('p2-name').value || "Sub";
+            this.players.sTitle = document.getElementById('p2-title').value;
+            this.state.maxRounds = parseInt(document.getElementById('rounds').value) || 10;
+
+            document.getElementById('ui-players').innerText = `${this.players.dName} & ${this.players.sName}`;
+            document.getElementById('setup-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+        },
+
+        drawTask() {
+            AudioEngine.play('click');
+            if (this.state.round >= this.state.maxRounds) {
+                this.endSession();
+                return;
+            }
+
+            this.state.isPaused = false;
+            this.state.round++;
+            document.getElementById('ui-round').innerText = `Round ${this.state.round} / ${this.state.maxRounds}`;
+
+            // Filter out tasks if required inventory category is completely empty
+            let validTasks = this.tasks.filter(t => {
+                return !Object.keys(this.inventory).some(cat => t.text.includes(`[${cat}]`) && this.inventory[cat].length === 0);
+            });
+
+            if (validTasks.length === 0) {
+                alert("Inventory is too empty! Please add items to the required categories or skip.");
+                validTasks = this.tasks; // Fallback to all tasks so it doesn't break
+            }
+
+            this.state.currentTask = validTasks[Math.floor(Math.random() * validTasks.length)];
+            let html = this.state.currentTask.text;
+
+            // 1. Replace Player Tokens
+            html = html.replace(/{dom}/g, `<span class="player-name">${this.players.dTitle} ${this.players.dName}</span>`);
+            html = html.replace(/{sub}/g, `<span class="player-name">${this.players.sName}</span>`);
+
+            // 2. Replace Inventory Tokens
+            Object.keys(this.inventory).forEach(cat => {
+                const regex = new RegExp(`\\[${cat}\\]`, 'g');
+                html = html.replace(regex, () => {
+                    const items = this.inventory[cat];
+                    const choice = items.length > 0 ? items[Math.floor(Math.random() * items.length)] : cat;
+                    return `<span class="dynamic-item">${choice}</span>`;
+                });
+            });
+
+            document.getElementById('task-text').innerHTML = html;
+            this.runTimer(this.state.currentTask.time);
+        },
+
+        deleteCurrentTask() {
+            if (!this.state.currentTask) return;
+            if (confirm("Permanently delete this task from the database?")) {
+                this.tasks = this.tasks.filter(t => t.text !== this.state.currentTask.text);
+                this.saveData();
+                this.state.round--; // Prevent round consumption on deletion
+                this.drawTask();
+            }
+        },
+
+        veto() {
+            if (this.state.vetos > 0) {
+                AudioEngine.play('veto');
+                this.state.vetos--;
+                this.state.round--; // Don't count vetoed task as a round
+                document.getElementById('ui-vetos').innerText = `Vetos: ${this.state.vetos}`;
+                this.drawTask();
+            } else {
+                alert("Out of vetos!");
+            }
+        },
+
+        runTimer(sec) {
+            clearInterval(this.state.timerId);
+            let t = sec;
+            this.state.timerId = setInterval(() => {
+                if (this.state.isPaused) return;
+                t--;
+                let m = Math.floor(t / 60), s = t % 60;
+                document.getElementById('timer-display').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                if (t <= 0) {
+                    clearInterval(this.state.timerId);
+                    AudioEngine.play('alert');
+                }
+            }, 1000);
+        },
+
+        yellowCard() {
+            this.state.isPaused = !this.state.isPaused;
+            document.getElementById('task-text').style.opacity = this.state.isPaused ? '0.5' : '1';
+        },
+
+        redCard() {
+            AudioEngine.play('stop');
+            clearInterval(this.state.timerId);
+            document.getElementById('task-text').innerHTML = `<span style="color:var(--danger); font-weight:800; font-size:2rem;">RED CARD TRIGGERED</span><br>Stop all play immediately. Focus on aftercare.`;
+            document.getElementById('timer-display').innerText = "00:00";
+            document.getElementById('btn-next').disabled = true;
+            document.getElementById('btn-veto').disabled = true;
+        },
+
+        endSession() {
+            clearInterval(this.state.timerId);
+            let prizeHTML = "Session Complete!";
+            if (this.prizes.length > 0) {
+                const won = this.prizes[Math.floor(Math.random() * this.prizes.length)];
+                prizeHTML = `Session Complete!<br><br><span style="color:var(--success); font-size:1.5rem;">Grand Prize Won:</span><br><span style="color:var(--gold);">${won}</span>`;
+            }
+            document.getElementById('task-text').innerHTML = prizeHTML;
+            document.getElementById('timer-display').innerText = "DONE";
+            document.getElementById('btn-next').disabled = true;
+        }
+    };
+
+    Engine.init();
+</script>
+</body>
+</html>
