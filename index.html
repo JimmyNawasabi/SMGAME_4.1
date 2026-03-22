@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Master: Power Exchange Engine</title>
+    <title>Task Master: Professional Session Engine</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
         :root {
@@ -11,13 +11,13 @@
             --primary: #8b5cf6; --accent: #f43f5e; --gold: #fbbf24;
             --text: #f4f4f5; --text-muted: #a1a1aa; --success: #22c55e;
         }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .app-container { width: 100%; max-width: 950px; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; display: flex; justify-content: center; }
+        .app-container { width: 100%; max-width: 1000px; }
         .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.7); }
         h1, h2, h3 { color: var(--primary); font-weight: 800; text-transform: uppercase; margin-top: 0; letter-spacing: 1px; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
         label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 700; text-transform: uppercase; }
-        input, select, textarea { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); box-sizing: border-box; font-family: inherit; }
+        input, select, textarea { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); box-sizing: border-box; font-family: inherit; }
         
         .btn { padding: 14px; border: none; border-radius: 6px; cursor: pointer; font-weight: 800; width: 100%; text-transform: uppercase; transition: 0.2s; }
         .btn-primary { background: var(--primary); color: white; }
@@ -26,20 +26,20 @@
         .btn-danger { background: var(--accent); color: white; }
         .btn-warning { background: #ca8a04; color: white; }
 
-        .db-box { background: #111; padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; }
-        .chip { display: inline-flex; align-items: center; background: var(--border); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; margin: 4px; border: 2px solid transparent; cursor: pointer; font-weight: 600; }
+        /* Inventory Management */
+        .inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .db-box { background: #111; padding: 12px; border-radius: 8px; border: 1px solid var(--border); }
+        .chip { display: inline-flex; align-items: center; background: var(--border); padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; margin: 3px; border: 2px solid transparent; cursor: pointer; }
         .chip.active { border-color: var(--primary); background: #2e1a4d; }
-        .chip span { margin-left: 10px; color: var(--accent); font-weight: 900; }
+        .chip span { margin-left: 8px; color: var(--accent); font-weight: 900; }
 
+        /* Gameplay Styles */
         #game-screen { display: none; }
-        .timer-box { text-align: center; margin: 20px 0; padding: 25px; background: #000; border-radius: 8px; border: 3px solid var(--gold); position: relative; }
-        .timer-val { font-size: 5.5rem; font-weight: 800; color: var(--gold); font-variant-numeric: tabular-nums; }
+        .timer-box { text-align: center; margin: 20px 0; padding: 20px; background: #000; border-radius: 8px; border: 3px solid var(--gold); }
+        .timer-val { font-size: 5rem; font-weight: 800; color: var(--gold); font-variant-numeric: tabular-nums; }
         .score-display { display: flex; justify-content: space-around; background: #000; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border); }
-        .score-card { text-align: center; }
-        .score-num { font-size: 2rem; font-weight: 800; color: var(--primary); }
-        
-        .task-card { font-size: 1.4rem; line-height: 1.6; min-height: 150px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 30px; background: #0a0a0a; border-radius: 8px; border-left: 8px solid var(--primary); margin-bottom: 20px; }
-        .safety-bar { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .score-num { font-size: 1.8rem; font-weight: 800; color: var(--primary); }
+        .task-card { font-size: 1.3rem; line-height: 1.5; min-height: 120px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 25px; background: #0a0a0a; border-radius: 8px; border-left: 8px solid var(--primary); margin-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -48,7 +48,7 @@
     <div id="setup-screen" class="panel">
         <h1>Engine Configuration</h1>
         
-        <div class="grid-2">
+        <div class="grid-3" style="margin-bottom: 20px;">
             <div class="form-group">
                 <label>Player A</label>
                 <input type="text" id="pa-name" placeholder="Name" style="margin-bottom: 5px;">
@@ -59,17 +59,22 @@
                 <input type="text" id="pb-name" placeholder="Name" style="margin-bottom: 5px;">
                 <select id="pb-gender"><option value="male">Male</option><option value="female">Female</option><option value="nb">Non-Binary</option></select>
             </div>
+            <div class="form-group">
+                <label>Vetos & Rounds</label>
+                <input type="number" id="setup-rounds" value="10" placeholder="Rounds">
+                <input type="number" id="setup-vetos" value="3" placeholder="Vetos" style="margin-top:5px;">
+            </div>
         </div>
 
-        <h3>Inventory & Tools</h3>
-        <div class="grid-2" id="inventory-ui"></div>
+        <h3>1. Dynamic Inventory (Toggle items On/Off)</h3>
+        <div class="inv-grid" id="inventory-ui"></div>
 
-        <div class="grid-2">
+        <div class="grid-3">
             <div>
-                <h3>Custom Task Creator</h3>
+                <h3>2. Custom Task Creator</h3>
                 <div class="db-box">
-                    <textarea id="new-task-text" placeholder="Tokens: {dom}, {sub}, [Restraint], [Impact], [Sensory], [Toy]" rows="2"></textarea>
-                    <div class="grid-2" style="margin-top: 10px;">
+                    <textarea id="new-task-text" placeholder="Tokens: {dom}, {sub}, [Restraint], [Impact], [Sensory], [Toy], [Gag], [Blindfold]" rows="2"></textarea>
+                    <div style="display: flex; gap: 5px; margin-top: 10px;">
                         <input type="number" id="new-task-t1" placeholder="P1 Secs">
                         <input type="number" id="new-task-t2" placeholder="P2 Secs">
                     </div>
@@ -77,50 +82,50 @@
                 </div>
             </div>
             <div>
-                <h3>Grand Prizes</h3>
+                <h3>3. Grand Prizes</h3>
                 <div class="db-box">
-                    <input type="text" id="new-prize" placeholder="e.g. 1-hour massage">
-                    <button class="btn btn-outline" style="margin-top:10px;" onclick="Engine.savePrize()">Save Prize</button>
+                    <input type="text" id="new-prize" placeholder="Final Reward...">
+                    <button class="btn btn-outline" style="margin-top:10px;" onclick="Engine.savePrize()">Add Prize</button>
                     <div id="prize-list" style="margin-top:10px;"></div>
                 </div>
             </div>
         </div>
 
-        <button class="btn btn-primary" style="padding: 20px; font-size: 1.2rem;" onclick="Engine.start()">Randomize Roles & Start</button>
+        <button class="btn btn-primary" style="padding: 20px; font-size: 1.2rem; margin-top: 20px;" onclick="Engine.start()">Enter The Chamber</button>
     </div>
 
     <div id="game-screen">
         <div class="panel">
             <div class="score-display">
-                <div class="score-card"><label id="label-pa">Player A</label><div class="score-num" id="score-pa">0</div></div>
-                <div class="score-card"><label>Round</label><div class="score-num" id="ui-round">1</div></div>
-                <div class="score-card"><label id="label-pb">Player B</label><div class="score-num" id="score-pb">0</div></div>
+                <div style="text-align:center"><label id="label-pa">Player A</label><div class="score-num" id="score-pa">0</div></div>
+                <div style="text-align:center"><label>Round</label><div class="score-num" id="ui-round">1</div></div>
+                <div style="text-align:center"><label id="label-pb">Player B</label><div class="score-num" id="score-pb">0</div></div>
             </div>
 
             <div style="text-align: center; font-weight: 800; color: var(--gold); margin-bottom: 10px; text-transform: uppercase;">
-                Master: <span id="current-dom-name">?</span> | Vetos: <span id="ui-vetos">3</span>
+                Dom: <span id="current-dom-name">?</span> | Vetos: <span id="ui-vetos">3</span>
             </div>
 
             <div class="timer-box">
-                <div id="phase-name" style="color:var(--primary); font-weight: 800;">AWAITING MASTER</div>
+                <div id="phase-name" style="color:var(--primary); font-weight: 800; text-transform: uppercase;">Preparation</div>
                 <div class="timer-val" id="timer-display">00:00</div>
             </div>
 
-            <div class="task-card" id="task-text">...</div>
+            <div class="task-card" id="task-text">Initializing...</div>
 
             <div id="game-controls">
                 <button class="btn btn-primary" id="timer-btn" onclick="Engine.triggerPhase()">Start Phase 1</button>
-                <div class="grid-2" id="resolution-btns" style="display:none;">
-                    <button class="btn btn-success" onclick="Engine.resolve(true)">Sub Success (Swap Roles)</button>
+                <div class="grid-3" id="resolution-btns" style="display:none; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <button class="btn btn-success" onclick="Engine.resolve(true)">Sub Success (Swap)</button>
                     <button class="btn btn-danger" onclick="Engine.resolve(false)">Sub Failure (Stay)</button>
                 </div>
                 
-                <div class="safety-bar">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px;">
                     <button class="btn btn-outline" onclick="Engine.veto()">Veto</button>
                     <button class="btn btn-warning" id="pause-btn" onclick="Engine.togglePause()">Yellow Card</button>
-                    <button class="btn btn-danger" onclick="Engine.safeWord()">Safe Word (-5)</button>
+                    <button class="btn btn-danger" onclick="Engine.safeWord()">SAFE WORD (-5)</button>
                 </div>
-                <button class="btn btn-danger" style="margin-top: 15px; background: #7f1d1d;" onclick="Engine.redCard()">RED CARD (STOP SESSION)</button>
+                <button class="btn btn-danger" style="margin-top: 15px; background: #7f1d1d;" onclick="Engine.redCard()">EMERGENCY RED CARD (STOP)</button>
                 <button class="btn btn-gold" id="next-btn" style="display:none;" onclick="Engine.drawTask()">Next Round</button>
             </div>
         </div>
@@ -129,9 +134,12 @@
 
 <script>
     const Engine = {
-        inventory: JSON.parse(localStorage.getItem('tm_v3_inv')) || { Restraint: [], Impact: [], Sensory: [], Toy: [] },
-        customTasks: JSON.parse(localStorage.getItem('tm_v3_tasks')) || [],
-        prizes: JSON.parse(localStorage.getItem('tm_v3_prizes')) || [],
+        // FULL CATEGORY LIST
+        inventory: JSON.parse(localStorage.getItem('tm_v4_inv')) || { 
+            Restraint: [], Impact: [], Sensory: [], Toy: [], Gag: [], Blindfold: [], Furniture: [], Clothing: [] 
+        },
+        customTasks: JSON.parse(localStorage.getItem('tm_v4_tasks')) || [],
+        prizes: JSON.parse(localStorage.getItem('tm_v4_prizes')) || [],
         
         state: { pa: {n:'', s:0}, pb: {n:'', s:0}, dom: null, sub: null, round: 1, timer: null, currentTask: null, phase: 0, vetos: 3, isPaused: false, timeLeft: 0 },
 
@@ -141,15 +149,14 @@
                 const div = document.createElement('div');
                 div.className = 'db-box';
                 div.innerHTML = `<label>${cat}</label>
-                    <input type="text" placeholder="Add..." onkeydown="if(event.key==='Enter') Engine.addItem('${cat}', this)">
-                    <div id="list-${cat}"></div>`;
+                    <input type="text" placeholder="Add ${cat}..." onkeydown="if(event.key==='Enter') Engine.addItem('${cat}', this)">
+                    <div id="list-${cat}" style="min-height:20px; margin-top:5px;"></div>`;
                 ui.appendChild(div);
                 this.renderItems(cat);
             });
             this.renderPrizes();
         },
 
-        // INVENTORY
         addItem(cat, input) {
             if(!input.value) return;
             this.inventory[cat].push({ name: input.value, active: true });
@@ -164,7 +171,6 @@
                 </div>`).join('');
         },
 
-        // CUSTOM DATABASE
         saveCustomTask() {
             const t = document.getElementById('new-task-text').value;
             const t1 = parseInt(document.getElementById('new-task-t1').value) || 60;
@@ -181,17 +187,18 @@
         },
         removePrize(i) { this.prizes.splice(i, 1); this.save(); this.renderPrizes(); },
         save() {
-            localStorage.setItem('tm_v3_inv', JSON.stringify(this.inventory));
-            localStorage.setItem('tm_v3_tasks', JSON.stringify(this.customTasks));
-            localStorage.setItem('tm_v3_prizes', JSON.stringify(this.prizes));
+            localStorage.setItem('tm_v4_inv', JSON.stringify(this.inventory));
+            localStorage.setItem('tm_v4_tasks', JSON.stringify(this.customTasks));
+            localStorage.setItem('tm_v4_prizes', JSON.stringify(this.prizes));
         },
 
-        // SESSION ENGINE
         start() {
             this.state.pa.n = document.getElementById('pa-name').value || "Player A";
             this.state.pb.n = document.getElementById('pb-name').value || "Player B";
+            this.state.vetos = parseInt(document.getElementById('setup-vetos').value) || 3;
             document.getElementById('label-pa').innerText = this.state.pa.n;
             document.getElementById('label-pb').innerText = this.state.pb.n;
+            document.getElementById('ui-vetos').innerText = this.state.vetos;
             
             if(Math.random() > 0.5) { this.state.dom = this.state.pa; this.state.sub = this.state.pb; } 
             else { this.state.dom = this.state.pb; this.state.sub = this.state.pa; }
@@ -202,21 +209,15 @@
         },
 
         drawTask() {
-            this.state.phase = 0;
-            this.state.isPaused = false;
-            clearInterval(this.state.timer);
-            
+            this.state.phase = 0; this.state.isPaused = false; clearInterval(this.state.timer);
             const pool = this.customTasks.length > 0 ? this.customTasks : [{text: "{dom} uses [Impact] for [T1]. {sub} escapes [Restraint] in [T2].", t1:120, t2:180}];
             this.state.currentTask = pool[Math.floor(Math.random() * pool.length)];
             
-            let html = this.state.currentTask.text
-                .replace(/{dom}/g, this.state.dom.n).replace(/{sub}/g, this.state.sub.n)
-                .replace(/\[T1\]/g, this.state.currentTask.t1 + 's')
-                .replace(/\[T2\]/g, this.state.currentTask.t2 + 's');
-
+            let html = this.state.currentTask.text.replace(/{dom}/g, this.state.dom.n).replace(/{sub}/g, this.state.sub.n);
+            
             Object.keys(this.inventory).forEach(cat => {
-                const activeItems = this.inventory[cat].filter(i => i.active);
-                const pick = activeItems.length > 0 ? activeItems[Math.floor(Math.random()*activeItems.length)].name : cat;
+                const active = this.inventory[cat].filter(i => i.active);
+                const pick = active.length > 0 ? active[Math.floor(Math.random()*active.length)].name : `(${cat})`;
                 html = html.replace(new RegExp(`\\[${cat}\\]`, 'g'), `<span style="color:var(--gold)">${pick}</span>`);
             });
 
@@ -224,37 +225,37 @@
             document.getElementById('current-dom-name').innerText = this.state.dom.n;
             document.getElementById('timer-display').innerText = this.fmt(this.state.currentTask.t1);
             document.getElementById('timer-btn').style.display = 'block';
-            document.getElementById('timer-btn').innerText = `Start Phase 1 (${this.state.dom.n})`;
+            document.getElementById('timer-btn').innerText = `Start P1 (${this.state.dom.n})`;
             document.getElementById('next-btn').style.display = 'none';
             document.getElementById('resolution-btns').style.display = 'none';
+            document.getElementById('phase-name').innerText = "Trial Assigned";
         },
 
         triggerPhase() {
             if(this.state.phase === 0) {
-                this.state.phase = 1;
-                this.runTimer(this.state.currentTask.t1);
+                this.state.phase = 1; this.runTimer(this.state.currentTask.t1);
+                document.getElementById('phase-name').innerText = "Phase 1: Application";
                 if(this.state.currentTask.t2 > 0) {
-                    document.getElementById('timer-btn').innerText = `Start Phase 2 (${this.state.sub.n})`;
+                    document.getElementById('timer-btn').innerText = `Start P2 (${this.state.sub.n})`;
                 } else {
                     document.getElementById('timer-btn').style.display = 'none';
                     document.getElementById('resolution-btns').style.display = 'grid';
                 }
             } else {
-                this.state.phase = 2;
-                this.runTimer(this.state.currentTask.t2);
+                this.state.phase = 2; this.runTimer(this.state.currentTask.t2);
+                document.getElementById('phase-name').innerText = "Phase 2: Challenge";
                 document.getElementById('timer-btn').style.display = 'none';
                 document.getElementById('resolution-btns').style.display = 'grid';
             }
         },
 
         runTimer(sec) {
-            clearInterval(this.state.timer);
-            this.state.timeLeft = sec;
+            clearInterval(this.state.timer); this.state.timeLeft = sec;
             this.state.timer = setInterval(() => {
                 if(!this.state.isPaused) {
                     this.state.timeLeft--;
                     document.getElementById('timer-display').innerText = this.fmt(this.state.timeLeft);
-                    if(this.state.timeLeft <= 0) clearInterval(this.state.timer);
+                    if(this.state.timeLeft <= 0) { clearInterval(this.state.timer); document.getElementById('timer-display').innerText = "TIME UP"; }
                 }
             }, 1000);
         },
@@ -262,33 +263,26 @@
         resolve(success) {
             if(success) {
                 this.state.sub.s += 10;
-                let temp = this.state.dom;
-                this.state.dom = this.state.sub;
-                this.state.sub = temp;
-                alert("Role Swap! The Sub has taken control.");
-            } else {
-                this.state.dom.s += 5;
-            }
-            this.updateScores();
-            this.state.round++;
+                let temp = this.state.dom; this.state.dom = this.state.sub; this.state.sub = temp;
+                alert(`${this.state.dom.n} has taken control!`);
+            } else { this.state.dom.s += 5; }
+            this.updateScores(); this.state.round++;
             document.getElementById('ui-round').innerText = this.state.round;
             document.getElementById('resolution-btns').style.display = 'none';
             document.getElementById('next-btn').style.display = 'block';
+            document.getElementById('phase-name').innerText = "Round Result";
         },
 
-        // SAFETY & UTILITY
         togglePause() { 
             this.state.isPaused = !this.state.isPaused; 
             document.getElementById('pause-btn').innerText = this.state.isPaused ? "RESUME" : "Yellow Card";
         },
         veto() { if(this.state.vetos > 0) { this.state.vetos--; document.getElementById('ui-vetos').innerText = this.state.vetos; this.drawTask(); } },
         safeWord() { 
-            this.state.sub.s = Math.max(0, this.state.sub.s - 5); 
-            this.updateScores(); 
-            alert("Safe Word Used. Submissive loses 5 points. Timer paused."); 
-            this.state.isPaused = true;
+            this.state.sub.s = Math.max(0, this.state.sub.s - 5); this.updateScores(); 
+            this.state.isPaused = true; alert("SAFE WORD: Sub -5 points. Timer Paused."); 
         },
-        redCard() { clearInterval(this.state.timer); document.body.innerHTML = "<div style='color:white; text-align:center; margin-top:100px;'><h1>SESSION HALTED</h1><p>Red Card issued. Focus on aftercare.</p><button onclick='location.reload()' style='padding:10px;'>Restart Engine</button></div>"; },
+        redCard() { clearInterval(this.state.timer); document.body.innerHTML = "<div style='color:white; text-align:center; padding:50px;'><h1>EMERGENCY STOP</h1><p>The session has ended. Focus on aftercare.</p><button onclick='location.reload()'>Reset Engine</button></div>"; },
         updateScores() {
             document.getElementById('score-pa').innerText = this.state.pa.s;
             document.getElementById('score-pb').innerText = this.state.pb.s;
