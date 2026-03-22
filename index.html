@@ -211,7 +211,7 @@
         drawTask() {
             if(this.state.round > this.state.totalRounds) { return this.endSession(); }
             this.state.isPaused = false; clearInterval(this.state.timer);
-            const pool = this.customTasks.length > 0 ? this.customTasks : [{text: "{dom} Blindfolds with [Blindfold] and applies [Gag] to gag {sub} then ties wrists behind their back and their ankles togther pulling them into strict hogtie using [Restraint]. [Sub] must remain still for [Time] while [Dom] uses [Sensory] without making a sound or moving.", time: 180}]; this.state.currentTask = pool[Math.floor(Math.random() * pool.length)];
+            const pool = this.customTasks.length > 0 ? this.customTasks : [{text: "{dom} Blindfolds {sub} with [Blindfold] and applies [Gag] to gag {sub} then ties their wrists behind their back and ties their ankles togther pulling them into a strict hogtie using [Restraint]. [Sub] must remain still for [Time] while [Dom] uses [Sensory] without making a sound or moving.", time: 180}]; this.state.currentTask = pool[Math.floor(Math.random() * pool.length)];
             this.state.currentTask = pool[Math.floor(Math.random() * pool.length)];
             
             let finalHtml = this.state.currentTask.text
