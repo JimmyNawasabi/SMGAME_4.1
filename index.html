@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Master: Dynamic Item Edition</title>
+    <title>Task Master: Performance Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
         :root {
@@ -62,7 +62,6 @@
         </div>
 
         <h3>1. Inventory Database</h3>
-        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">Add items and click to toggle them "ON" (Purple). Only active items appear in tasks.</p>
         <div class="inv-grid" id="inventory-ui"></div>
 
         <div class="grid-3">
@@ -70,14 +69,14 @@
                 <h3>2. Task Creator</h3>
                 <div class="db-box">
                     <textarea id="new-task-text" placeholder="Tokens: {dom}, {sub}, [Restraint], [Impact], [Sensory], [Toy], [Gag], [Blindfold]" rows="3"></textarea>
-                    <input type="number" id="new-task-time" placeholder="Task Seconds (e.g. 300)" style="margin-top:10px;">
+                    <input type="number" id="new-task-time" placeholder="Duration (Seconds)" style="margin-top:10px;">
                     <button class="btn btn-outline" style="margin-top:10px;" onclick="Engine.saveCustomTask()">Save Task</button>
                 </div>
             </div>
             <div>
                 <h3>3. Grand Prizes</h3>
                 <div class="db-box">
-                    <input type="text" id="new-prize" placeholder="Reward Description...">
+                    <input type="text" id="new-prize" placeholder="Winner's Reward...">
                     <button class="btn btn-outline" style="margin-top:10px;" onclick="Engine.savePrize()">Add Prize</button>
                     <div id="prize-list" style="margin-top:10px;"></div>
                 </div>
@@ -97,15 +96,15 @@
                 Dom: <span id="current-dom-name">?</span> | Vetos: <span id="ui-vetos">3</span>
             </div>
             <div class="timer-box">
-                <div id="phase-name" style="color:var(--primary); font-weight: 800; text-transform: uppercase;">Task Ready</div>
+                <div id="phase-name" style="color:var(--primary); font-weight: 800; text-transform: uppercase;">Awaiting Master</div>
                 <div class="timer-val" id="timer-display">00:00</div>
             </div>
             <div class="task-card" id="task-text">Initializing...</div>
             <div id="game-controls">
-                <button class="btn btn-primary" id="timer-btn" onclick="Engine.triggerPhase()">Start Task Timer</button>
+                <button class="btn btn-primary" id="timer-btn" onclick="Engine.triggerPhase()">Start Task</button>
                 <div class="grid-3" id="resolution-btns" style="display:none; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <button class="btn btn-success" onclick="Engine.resolve(true)">Sub Success (Swap)</button>
-                    <button class="btn btn-danger" onclick="Engine.resolve(false)">Sub Failure (Stay)</button>
+                    <button class="btn btn-success" onclick="Engine.resolve(true)">Success (+1 & Swap)</button>
+                    <button class="btn btn-danger" onclick="Engine.resolve(false)">Failure (-1 & Stay)</button>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px;">
                     <button class="btn btn-outline" onclick="Engine.veto()">Veto</button>
@@ -121,11 +120,11 @@
 
 <script>
     const Engine = {
-        inventory: JSON.parse(localStorage.getItem('tm_vFinal_inv')) || { 
+        inventory: JSON.parse(localStorage.getItem('tm_v6_inv')) || { 
             Restraint: [], Impact: [], Sensory: [], Toy: [], Gag: [], Blindfold: [], Furniture: [], Clothing: [] 
         },
-        customTasks: JSON.parse(localStorage.getItem('tm_vFinal_tasks')) || [],
-        prizes: JSON.parse(localStorage.getItem('tm_vFinal_prizes')) || [],
+        customTasks: JSON.parse(localStorage.getItem('tm_v6_tasks')) || [],
+        prizes: JSON.parse(localStorage.getItem('tm_v6_prizes')) || [],
         state: { pa: {n:'', s:0}, pb: {n:'', s:0}, dom: null, sub: null, round: 1, timer: null, currentTask: null, vetos: 3, isPaused: false, timeLeft: 0 },
 
         init() {
@@ -134,7 +133,7 @@
                 const div = document.createElement('div');
                 div.className = 'db-box';
                 div.innerHTML = `<label>${cat}</label>
-                    <input type="text" placeholder="Add to ${cat}..." onkeydown="if(event.key==='Enter') Engine.addItem('${cat}', this)">
+                    <input type="text" placeholder="Add..." onkeydown="if(event.key==='Enter') Engine.addItem('${cat}', this)">
                     <div id="list-${cat}" style="min-height:20px; margin-top:5px;"></div>`;
                 ui.appendChild(div);
                 this.renderItems(cat);
@@ -171,9 +170,9 @@
         },
         removePrize(i) { this.prizes.splice(i, 1); this.save(); this.renderPrizes(); },
         save() {
-            localStorage.setItem('tm_vFinal_inv', JSON.stringify(this.inventory));
-            localStorage.setItem('tm_vFinal_tasks', JSON.stringify(this.customTasks));
-            localStorage.setItem('tm_vFinal_prizes', JSON.stringify(this.prizes));
+            localStorage.setItem('tm_v6_inv', JSON.stringify(this.inventory));
+            localStorage.setItem('tm_v6_tasks', JSON.stringify(this.customTasks));
+            localStorage.setItem('tm_v6_prizes', JSON.stringify(this.prizes));
         },
 
         start() {
@@ -192,7 +191,7 @@
 
         drawTask() {
             this.state.isPaused = false; clearInterval(this.state.timer);
-            const pool = this.customTasks.length > 0 ? this.customTasks : [{text: "{dom} applies [Restraint] while {sub} remains still for [Time].", time: 180}];
+            const pool = this.customTasks.length > 0 ? this.customTasks : [{text: "{dom} uses [Impact] while {sub} remains still for [Time].", time: 180}];
             this.state.currentTask = pool[Math.floor(Math.random() * pool.length)];
             
             let finalHtml = this.state.currentTask.text
@@ -200,17 +199,13 @@
                 .replace(/{sub}/g, `<span style="color:var(--primary)">${this.state.sub.n}</span>`)
                 .replace(/\[Time\]/g, this.fmt(this.state.currentTask.time));
 
-            // FIXED ITEM POPULATION LOGIC
             Object.keys(this.inventory).forEach(cat => {
                 const activeItems = this.inventory[cat].filter(item => item.active);
                 const placeholder = `[${cat}]`;
-                
-                // If the task uses this category token
                 if (finalHtml.includes(placeholder)) {
                     const chosenItem = activeItems.length > 0 
                         ? activeItems[Math.floor(Math.random() * activeItems.length)].name 
-                        : `(No active ${cat})`;
-                    
+                        : `(No ${cat})`;
                     finalHtml = finalHtml.split(placeholder).join(`<span class="item-highlight">${chosenItem}</span>`);
                 }
             });
@@ -221,12 +216,12 @@
             document.getElementById('timer-btn').style.display = 'block';
             document.getElementById('next-btn').style.display = 'none';
             document.getElementById('resolution-btns').style.display = 'none';
-            document.getElementById('phase-name').innerText = "Task Ready";
+            document.getElementById('phase-name').innerText = "Trial Assigned";
         },
 
         triggerPhase() {
             this.runTimer(this.state.currentTask.time);
-            document.getElementById('phase-name').innerText = "Task in Progress";
+            document.getElementById('phase-name').innerText = "Trial Active";
             document.getElementById('timer-btn').style.display = 'none';
             document.getElementById('resolution-btns').style.display = 'grid';
         },
@@ -244,10 +239,13 @@
 
         resolve(success) {
             if(success) {
-                this.state.sub.s += 10;
+                this.state.sub.s += 1;
                 let temp = this.state.dom; this.state.dom = this.state.sub; this.state.sub = temp;
-                alert(`${this.state.dom.n} seized control!`);
-            } else { this.state.dom.s += 5; }
+                alert(`Success! Roles Swapped. ${this.state.dom.n} is now the Master.`);
+            } else { 
+                this.state.sub.s -= 1;
+                alert(`Failure. ${this.state.sub.n} loses 1 point.`);
+            }
             this.updateScores(); this.state.round++;
             document.getElementById('ui-round').innerText = this.state.round;
             document.getElementById('resolution-btns').style.display = 'none';
@@ -256,7 +254,12 @@
 
         togglePause() { this.state.isPaused = !this.state.isPaused; document.getElementById('pause-btn').innerText = this.state.isPaused ? "RESUME" : "Yellow Card"; },
         veto() { if(this.state.vetos > 0) { this.state.vetos--; document.getElementById('ui-vetos').innerText = this.state.vetos; this.drawTask(); } },
-        safeWord() { this.state.sub.s = Math.max(0, this.state.sub.s - 5); this.updateScores(); this.state.isPaused = true; alert("SAFE WORD: Sub -5 points. Timer Paused."); },
+        safeWord() { 
+            this.state.sub.s -= 5; 
+            this.updateScores(); 
+            this.state.isPaused = true; 
+            alert("SAFE WORD: Subversive loses 5 points. Check in with your partner."); 
+        },
         redCard() { clearInterval(this.state.timer); document.body.innerHTML = "<div style='color:white; text-align:center; padding:50px;'><h1>EMERGENCY STOP</h1><button onclick='location.reload()'>Reset Engine</button></div>"; },
         updateScores() { document.getElementById('score-pa').innerText = this.state.pa.s; document.getElementById('score-pb').innerText = this.state.pb.s; },
         fmt: (s) => `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`
