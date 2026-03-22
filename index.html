@@ -3,212 +3,300 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Master: Time-Trial Edition</title>
+    <title>Task Master: Power Exchange Engine</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
         :root {
             --bg: #09090b; --surface: #18181b; --border: #27272a;
-            --primary: #8b5cf6; --accent: #f43f5e; --gold: #ffb300;
+            --primary: #8b5cf6; --accent: #f43f5e; --gold: #fbbf24;
             --text: #f4f4f5; --text-muted: #a1a1aa; --success: #22c55e;
         }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .app-container { width: 100%; max-width: 850px; }
-        .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); }
-        h1 { color: var(--primary); font-weight: 800; text-align: center; text-transform: uppercase; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .form-group { margin-bottom: 16px; }
-        label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; }
-        input, select { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); box-sizing: border-box; }
-        .btn { padding: 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 800; width: 100%; text-transform: uppercase; transition: 0.2s; margin-top: 10px; }
+        .app-container { width: 100%; max-width: 950px; }
+        .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.7); }
+        h1, h2, h3 { color: var(--primary); font-weight: 800; text-transform: uppercase; margin-top: 0; letter-spacing: 1px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 700; text-transform: uppercase; }
+        input, select, textarea { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); box-sizing: border-box; font-family: inherit; }
+        
+        .btn { padding: 14px; border: none; border-radius: 6px; cursor: pointer; font-weight: 800; width: 100%; text-transform: uppercase; transition: 0.2s; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-gold { background: var(--gold); color: black; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
         .btn-danger { background: var(--accent); color: white; }
-        .btn-success { background: var(--success); color: white; }
-        
-        .timer-box { text-align: center; margin: 20px 0; padding: 20px; background: #000; border-radius: 8px; border: 1px solid var(--gold); }
-        .timer-val { font-size: 5rem; font-weight: 800; color: var(--gold); font-variant-numeric: tabular-nums; }
-        .phase-label { font-size: 1.2rem; color: var(--primary); font-weight: 800; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase; }
-        
-        .task-card { font-size: 1.3rem; line-height: 1.6; min-height: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 25px; background: #111; border-radius: 8px; border-left: 6px solid var(--primary); margin-bottom: 20px; }
-        .highlight { color: var(--gold); font-weight: 800; }
+        .btn-warning { background: #ca8a04; color: white; }
+
+        .db-box { background: #111; padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; }
+        .chip { display: inline-flex; align-items: center; background: var(--border); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; margin: 4px; border: 2px solid transparent; cursor: pointer; font-weight: 600; }
+        .chip.active { border-color: var(--primary); background: #2e1a4d; }
+        .chip span { margin-left: 10px; color: var(--accent); font-weight: 900; }
+
         #game-screen { display: none; }
-        .status-bar { display: flex; justify-content: space-between; font-weight: 800; color: var(--text-muted); margin-bottom: 15px; font-size: 0.9rem; }
+        .timer-box { text-align: center; margin: 20px 0; padding: 25px; background: #000; border-radius: 8px; border: 3px solid var(--gold); position: relative; }
+        .timer-val { font-size: 5.5rem; font-weight: 800; color: var(--gold); font-variant-numeric: tabular-nums; }
+        .score-display { display: flex; justify-content: space-around; background: #000; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border); }
+        .score-card { text-align: center; }
+        .score-num { font-size: 2rem; font-weight: 800; color: var(--primary); }
+        
+        .task-card { font-size: 1.4rem; line-height: 1.6; min-height: 150px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 30px; background: #0a0a0a; border-radius: 8px; border-left: 8px solid var(--primary); margin-bottom: 20px; }
+        .safety-bar { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
     <div id="setup-screen" class="panel">
-        <h1>Power Exchange: Time Trials</h1>
+        <h1>Engine Configuration</h1>
+        
         <div class="grid-2">
             <div class="form-group">
                 <label>Player A</label>
-                <input type="text" id="pa-name" placeholder="Name">
+                <input type="text" id="pa-name" placeholder="Name" style="margin-bottom: 5px;">
                 <select id="pa-gender"><option value="male">Male</option><option value="female">Female</option><option value="nb">Non-Binary</option></select>
             </div>
             <div class="form-group">
                 <label>Player B</label>
-                <input type="text" id="pb-name" placeholder="Name">
+                <input type="text" id="pb-name" placeholder="Name" style="margin-bottom: 5px;">
                 <select id="pb-gender"><option value="male">Male</option><option value="female">Female</option><option value="nb">Non-Binary</option></select>
             </div>
         </div>
-        <div class="form-group">
-            <label>Rounds</label>
-            <input type="number" id="rounds" value="10">
+
+        <h3>Inventory & Tools</h3>
+        <div class="grid-2" id="inventory-ui"></div>
+
+        <div class="grid-2">
+            <div>
+                <h3>Custom Task Creator</h3>
+                <div class="db-box">
+                    <textarea id="new-task-text" placeholder="Tokens: {dom}, {sub}, [Restraint], [Impact], [Sensory], [Toy]" rows="2"></textarea>
+                    <div class="grid-2" style="margin-top: 10px;">
+                        <input type="number" id="new-task-t1" placeholder="P1 Secs">
+                        <input type="number" id="new-task-t2" placeholder="P2 Secs">
+                    </div>
+                    <button class="btn btn-outline" style="margin-top:10px;" onclick="Engine.saveCustomTask()">Save Task</button>
+                </div>
+            </div>
+            <div>
+                <h3>Grand Prizes</h3>
+                <div class="db-box">
+                    <input type="text" id="new-prize" placeholder="e.g. 1-hour massage">
+                    <button class="btn btn-outline" style="margin-top:10px;" onclick="Engine.savePrize()">Save Prize</button>
+                    <div id="prize-list" style="margin-top:10px;"></div>
+                </div>
+            </div>
         </div>
-        <button class="btn btn-primary" onclick="Engine.start()">Randomize Roles & Begin</button>
+
+        <button class="btn btn-primary" style="padding: 20px; font-size: 1.2rem;" onclick="Engine.start()">Randomize Roles & Start</button>
     </div>
 
     <div id="game-screen">
         <div class="panel">
-            <div class="status-bar">
-                <span id="ui-round">Round 1</span>
-                <span id="ui-roles" style="color: var(--primary);">Master: ? | Sub: ?</span>
+            <div class="score-display">
+                <div class="score-card"><label id="label-pa">Player A</label><div class="score-num" id="score-pa">0</div></div>
+                <div class="score-card"><label>Round</label><div class="score-num" id="ui-round">1</div></div>
+                <div class="score-card"><label id="label-pb">Player B</label><div class="score-num" id="score-pb">0</div></div>
+            </div>
+
+            <div style="text-align: center; font-weight: 800; color: var(--gold); margin-bottom: 10px; text-transform: uppercase;">
+                Master: <span id="current-dom-name">?</span> | Vetos: <span id="ui-vetos">3</span>
             </div>
 
             <div class="timer-box">
-                <div class="phase-label" id="phase-name">Awaiting Master</div>
+                <div id="phase-name" style="color:var(--primary); font-weight: 800;">AWAITING MASTER</div>
                 <div class="timer-val" id="timer-display">00:00</div>
             </div>
 
-            <div class="task-card" id="task-text">Generate a task to begin the trial.</div>
+            <div class="task-card" id="task-text">...</div>
 
-            <div id="controls">
-                <button class="btn btn-primary" id="master-btn" onclick="Engine.nextPhase()">Master: Start Phase</button>
+            <div id="game-controls">
+                <button class="btn btn-primary" id="timer-btn" onclick="Engine.triggerPhase()">Start Phase 1</button>
                 <div class="grid-2" id="resolution-btns" style="display:none;">
-                    <button class="btn btn-success" onclick="Engine.resolve(true)">Sub Success (Swap)</button>
-                    <button class="btn btn-danger" onclick="Engine.resolve(false)">Sub Fail (Retain)</button>
+                    <button class="btn btn-success" onclick="Engine.resolve(true)">Sub Success (Swap Roles)</button>
+                    <button class="btn btn-danger" onclick="Engine.resolve(false)">Sub Failure (Stay)</button>
                 </div>
-                <button class="btn btn-gold" id="gen-btn" style="display:none;" onclick="Engine.drawTask()">Next Round</button>
+                
+                <div class="safety-bar">
+                    <button class="btn btn-outline" onclick="Engine.veto()">Veto</button>
+                    <button class="btn btn-warning" id="pause-btn" onclick="Engine.togglePause()">Yellow Card</button>
+                    <button class="btn btn-danger" onclick="Engine.safeWord()">Safe Word (-5)</button>
+                </div>
+                <button class="btn btn-danger" style="margin-top: 15px; background: #7f1d1d;" onclick="Engine.redCard()">RED CARD (STOP SESSION)</button>
+                <button class="btn btn-gold" id="next-btn" style="display:none;" onclick="Engine.drawTask()">Next Round</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    const taskDatabase = [
-        // DUAL TIMER TASKS (Application Phase & Challenge Phase)
-        { type: 'dual', text: "{dom}, you have [T1] to tie {sub}'s wrists behind their back using **[Restraints]**. Once done, {sub} has [T2] to escape.", t1: 180, t2: 120 },
-        { type: 'dual', text: "{dom}, apply **[Gags]** and **[Blindfolds]** within [T1]. {sub} then has [T1] to navigate the room and find the Master by sound alone.", t1: 120, t2: 180 },
-        { type: 'dual', text: "{dom}, tie {sub} in a 'Mermaid Tail' using **[Restraints]** in [T1]. {sub} must then hop across the room in [T2].", t1: 240, t2: 60 },
-        { type: 'dual', text: "{dom}, tie {sub} into a tight 'Hogtie' in [T1]. {sub} must then endure **[Impact]** for [T2] without crying out.", t1: 300, t2: 120 },
-        
-        // SINGLE TIMER TASKS (Immediate Challenge)
-        { type: 'single', text: "{sub} must endure continuous use of **[Toys]** on a sensitive area for [T1] without clenching or moving.", t1: 180 },
-        { type: 'single', text: "{sub} must count every strike of **[Impact]** delivered by {dom} for [T1]. Any missed count restarts the timer.", t1: 240 },
-        { type: 'single', text: "{sub} must keep a mouthful of water without swallowing while {dom} uses **[Sensation]** (ice/wax) for [T1].", t1: 150 }
-    ];
-
     const Engine = {
-        state: { round: 1, maxRounds: 10, phase: 0, timerId: null, currentTask: null },
-        p1: null, p2: null, dom: null, sub: null,
+        inventory: JSON.parse(localStorage.getItem('tm_v3_inv')) || { Restraint: [], Impact: [], Sensory: [], Toy: [] },
+        customTasks: JSON.parse(localStorage.getItem('tm_v3_tasks')) || [],
+        prizes: JSON.parse(localStorage.getItem('tm_v3_prizes')) || [],
+        
+        state: { pa: {n:'', s:0}, pb: {n:'', s:0}, dom: null, sub: null, round: 1, timer: null, currentTask: null, phase: 0, vetos: 3, isPaused: false, timeLeft: 0 },
 
+        init() {
+            const ui = document.getElementById('inventory-ui');
+            Object.keys(this.inventory).forEach(cat => {
+                const div = document.createElement('div');
+                div.className = 'db-box';
+                div.innerHTML = `<label>${cat}</label>
+                    <input type="text" placeholder="Add..." onkeydown="if(event.key==='Enter') Engine.addItem('${cat}', this)">
+                    <div id="list-${cat}"></div>`;
+                ui.appendChild(div);
+                this.renderItems(cat);
+            });
+            this.renderPrizes();
+        },
+
+        // INVENTORY
+        addItem(cat, input) {
+            if(!input.value) return;
+            this.inventory[cat].push({ name: input.value, active: true });
+            input.value = ''; this.save(); this.renderItems(cat);
+        },
+        toggleItem(cat, idx) { this.inventory[cat][idx].active = !this.inventory[cat][idx].active; this.save(); this.renderItems(cat); },
+        removeItem(cat, idx) { this.inventory[cat].splice(idx, 1); this.save(); this.renderItems(cat); },
+        renderItems(cat) {
+            document.getElementById(`list-${cat}`).innerHTML = this.inventory[cat].map((item, i) => 
+                `<div class="chip ${item.active ? 'active' : ''}" onclick="Engine.toggleItem('${cat}', ${i})">
+                    ${item.name} <span onclick="event.stopPropagation(); Engine.removeItem('${cat}', ${i})">×</span>
+                </div>`).join('');
+        },
+
+        // CUSTOM DATABASE
+        saveCustomTask() {
+            const t = document.getElementById('new-task-text').value;
+            const t1 = parseInt(document.getElementById('new-task-t1').value) || 60;
+            const t2 = parseInt(document.getElementById('new-task-t2').value) || 0;
+            if(t) { this.customTasks.push({ text: t, t1, t2 }); this.save(); alert("Task Saved"); document.getElementById('new-task-text').value = ''; }
+        },
+        savePrize() {
+            const p = document.getElementById('new-prize').value;
+            if(p) { this.prizes.push(p); this.save(); this.renderPrizes(); document.getElementById('new-prize').value = ''; }
+        },
+        renderPrizes() {
+            document.getElementById('prize-list').innerHTML = this.prizes.map((p, i) => 
+                `<div class="chip">${p} <span onclick="Engine.removePrize(${i})">×</span></div>`).join('');
+        },
+        removePrize(i) { this.prizes.splice(i, 1); this.save(); this.renderPrizes(); },
+        save() {
+            localStorage.setItem('tm_v3_inv', JSON.stringify(this.inventory));
+            localStorage.setItem('tm_v3_tasks', JSON.stringify(this.customTasks));
+            localStorage.setItem('tm_v3_prizes', JSON.stringify(this.prizes));
+        },
+
+        // SESSION ENGINE
         start() {
-            this.p1 = { name: document.getElementById('pa-name').value || "P1", gender: document.getElementById('pa-gender').value };
-            this.p2 = { name: document.getElementById('pb-name').value || "P2", gender: document.getElementById('pb-gender').value };
-            this.state.maxRounds = document.getElementById('rounds').value;
+            this.state.pa.n = document.getElementById('pa-name').value || "Player A";
+            this.state.pb.n = document.getElementById('pb-name').value || "Player B";
+            document.getElementById('label-pa').innerText = this.state.pa.n;
+            document.getElementById('label-pb').innerText = this.state.pb.n;
             
-            if(Math.random() > 0.5) { this.dom = this.p1; this.sub = this.p2; } 
-            else { this.dom = this.p2; this.sub = this.p1; }
+            if(Math.random() > 0.5) { this.state.dom = this.state.pa; this.state.sub = this.state.pb; } 
+            else { this.state.dom = this.state.pb; this.state.sub = this.state.pa; }
 
             document.getElementById('setup-screen').style.display = 'none';
             document.getElementById('game-screen').style.display = 'block';
-            this.updateUI();
             this.drawTask();
-        },
-
-        updateUI() {
-            const dTitle = this.getTitle(this.dom.gender, 'dom');
-            const sTitle = this.getTitle(this.dom.gender, 'sub');
-            document.getElementById('ui-roles').innerText = `Master: ${this.dom.name} | Sub: ${this.sub.name}`;
-            document.getElementById('ui-round').innerText = `Round ${this.state.round} / ${this.state.maxRounds}`;
-        },
-
-        getTitle(g, r) {
-            if(r === 'dom') return g === 'male' ? 'Master' : g === 'female' ? 'Mistress' : 'Dom';
-            return g === 'male' ? 'boy' : g === 'female' ? 'girl' : 'pet';
         },
 
         drawTask() {
             this.state.phase = 0;
-            this.state.currentTask = taskDatabase[Math.floor(Math.random() * taskDatabase.length)];
+            this.state.isPaused = false;
+            clearInterval(this.state.timer);
+            
+            const pool = this.customTasks.length > 0 ? this.customTasks : [{text: "{dom} uses [Impact] for [T1]. {sub} escapes [Restraint] in [T2].", t1:120, t2:180}];
+            this.state.currentTask = pool[Math.floor(Math.random() * pool.length)];
+            
             let html = this.state.currentTask.text
-                .replace(/{dom}/g, `<span class='highlight'>${this.dom.name}</span>`)
-                .replace(/{sub}/g, `<span class='highlight'>${this.sub.name}</span>`)
-                .replace(/\[T1\]/g, this.formatSec(this.state.currentTask.t1))
-                .replace(/\[T2\]/g, this.formatSec(this.state.currentTask.t2 || 0));
+                .replace(/{dom}/g, this.state.dom.n).replace(/{sub}/g, this.state.sub.n)
+                .replace(/\[T1\]/g, this.state.currentTask.t1 + 's')
+                .replace(/\[T2\]/g, this.state.currentTask.t2 + 's');
+
+            Object.keys(this.inventory).forEach(cat => {
+                const activeItems = this.inventory[cat].filter(i => i.active);
+                const pick = activeItems.length > 0 ? activeItems[Math.floor(Math.random()*activeItems.length)].name : cat;
+                html = html.replace(new RegExp(`\\[${cat}\\]`, 'g'), `<span style="color:var(--gold)">${pick}</span>`);
+            });
 
             document.getElementById('task-text').innerHTML = html;
-            document.getElementById('phase-name').innerText = "Trial Assigned";
-            document.getElementById('timer-display').innerText = this.formatSec(this.state.currentTask.t1);
-            
-            document.getElementById('master-btn').style.display = 'block';
-            document.getElementById('master-btn').innerText = `${this.dom.name}: Start Phase 1`;
-            document.getElementById('gen-btn').style.display = 'none';
+            document.getElementById('current-dom-name').innerText = this.state.dom.n;
+            document.getElementById('timer-display').innerText = this.fmt(this.state.currentTask.t1);
+            document.getElementById('timer-btn').style.display = 'block';
+            document.getElementById('timer-btn').innerText = `Start Phase 1 (${this.state.dom.n})`;
+            document.getElementById('next-btn').style.display = 'none';
             document.getElementById('resolution-btns').style.display = 'none';
         },
 
-        nextPhase() {
-            clearInterval(this.state.timerId);
-            this.state.phase++;
-            
-            if (this.state.phase === 1) {
-                document.getElementById('phase-name').innerText = "Phase 1: Application";
+        triggerPhase() {
+            if(this.state.phase === 0) {
+                this.state.phase = 1;
                 this.runTimer(this.state.currentTask.t1);
-                
-                if (this.state.currentTask.type === 'dual') {
-                    document.getElementById('master-btn').innerText = `${this.dom.name}: Ready for Phase 2`;
+                if(this.state.currentTask.t2 > 0) {
+                    document.getElementById('timer-btn').innerText = `Start Phase 2 (${this.state.sub.n})`;
                 } else {
-                    document.getElementById('master-btn').style.display = 'none';
+                    document.getElementById('timer-btn').style.display = 'none';
                     document.getElementById('resolution-btns').style.display = 'grid';
                 }
-            } 
-            else if (this.state.phase === 2 && this.state.currentTask.type === 'dual') {
-                document.getElementById('phase-name').innerText = "Phase 2: The Challenge";
+            } else {
+                this.state.phase = 2;
                 this.runTimer(this.state.currentTask.t2);
-                document.getElementById('master-btn').style.display = 'none';
+                document.getElementById('timer-btn').style.display = 'none';
                 document.getElementById('resolution-btns').style.display = 'grid';
             }
         },
 
         runTimer(sec) {
-            let t = sec;
-            this.state.timerId = setInterval(() => {
-                t--;
-                document.getElementById('timer-display').innerText = this.formatSec(t);
-                if (t <= 0) {
-                    clearInterval(this.state.timerId);
-                    document.getElementById('timer-display').innerText = "TIME UP";
+            clearInterval(this.state.timer);
+            this.state.timeLeft = sec;
+            this.state.timer = setInterval(() => {
+                if(!this.state.isPaused) {
+                    this.state.timeLeft--;
+                    document.getElementById('timer-display').innerText = this.fmt(this.state.timeLeft);
+                    if(this.state.timeLeft <= 0) clearInterval(this.state.timer);
                 }
             }, 1000);
         },
 
         resolve(success) {
-            clearInterval(this.state.timerId);
-            if (success) {
-                let temp = this.dom;
-                this.dom = this.sub;
-                this.sub = temp;
-                alert(`${this.dom.name} has usurped the power!`);
+            if(success) {
+                this.state.sub.s += 10;
+                let temp = this.state.dom;
+                this.state.dom = this.state.sub;
+                this.state.sub = temp;
+                alert("Role Swap! The Sub has taken control.");
             } else {
-                alert(`${this.dom.name} maintains control.`);
+                this.state.dom.s += 5;
             }
+            this.updateScores();
             this.state.round++;
-            this.updateUI();
-            
+            document.getElementById('ui-round').innerText = this.state.round;
             document.getElementById('resolution-btns').style.display = 'none';
-            document.getElementById('gen-btn').style.display = 'block';
-            document.getElementById('phase-name').innerText = "Round Over";
+            document.getElementById('next-btn').style.display = 'block';
         },
 
-        formatSec(s) {
-            let m = Math.floor(s / 60);
-            let sec = s % 60;
-            return `${m}:${sec.toString().padStart(2, '0')}`;
-        }
+        // SAFETY & UTILITY
+        togglePause() { 
+            this.state.isPaused = !this.state.isPaused; 
+            document.getElementById('pause-btn').innerText = this.state.isPaused ? "RESUME" : "Yellow Card";
+        },
+        veto() { if(this.state.vetos > 0) { this.state.vetos--; document.getElementById('ui-vetos').innerText = this.state.vetos; this.drawTask(); } },
+        safeWord() { 
+            this.state.sub.s = Math.max(0, this.state.sub.s - 5); 
+            this.updateScores(); 
+            alert("Safe Word Used. Submissive loses 5 points. Timer paused."); 
+            this.state.isPaused = true;
+        },
+        redCard() { clearInterval(this.state.timer); document.body.innerHTML = "<div style='color:white; text-align:center; margin-top:100px;'><h1>SESSION HALTED</h1><p>Red Card issued. Focus on aftercare.</p><button onclick='location.reload()' style='padding:10px;'>Restart Engine</button></div>"; },
+        updateScores() {
+            document.getElementById('score-pa').innerText = this.state.pa.s;
+            document.getElementById('score-pb').innerText = this.state.pb.s;
+        },
+        fmt: (s) => `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`
     };
 
-    Engine.init = Engine.updateUI;
+    Engine.init();
 </script>
 </body>
 </html>
