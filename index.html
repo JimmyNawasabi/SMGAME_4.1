@@ -263,7 +263,30 @@
         },
 
         togglePause() { this.state.isPaused = !this.state.isPaused; document.getElementById('pause-btn').innerText = this.state.isPaused ? "RESUME" : "PAUSE"; },
-        veto() { if(this.state.vetos > 0) { this.state.vetos--; document.getElementById('ui-vetos').innerText = this.state.vetos; this.drawTask(); } },
+        veto() { 
+            if(this.state.vetos > 0 && this.state.currentTask) { 
+                // 1. Find the current task in the master list
+                const taskIndex = this.customTasks.findIndex(t => t.text === this.state.currentTask.text);
+                
+                // 2. If found, remove it permanently from the array
+                if (taskIndex !== -1) {
+                    this.customTasks.splice(taskIndex, 1);
+                    this.save(); // Save the deletion to LocalStorage
+                }
+
+                // 3. Deduct the veto point and update UI
+                this.state.vetos--; 
+                document.getElementById('ui-vetos').innerText = this.state.vetos; 
+
+                // 4. Draw a new task or alert if empty
+                if (this.customTasks.length > 0) {
+                    this.drawTask(); 
+                } else {
+                    document.getElementById('task-text').innerHTML = "<div style='color:var(--accent)'>DATABASE EMPTY: NO TASKS REMAIN.</div>";
+                    document.getElementById('timer-btn').style.display = 'none';
+                }
+            } 
+        },
         safeWord() { this.state.sub.s -= 5; this.updateScores(); this.state.isPaused = true; alert("SAFE WORD: Sub -5 pts. Paused."); },
         redCard() { clearInterval(this.state.timer); document.body.innerHTML = "<div style='color:white; text-align:center; padding:50px;'><h1>EMERGENCY STOP</h1><button onclick='location.reload()'>Restart</button></div>"; },
         
