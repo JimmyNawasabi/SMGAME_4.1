@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Master: Full Configuration Edition</title>
+    <title>Task Master: Final Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
         :root {
@@ -55,23 +55,15 @@
             <div class="form-group">
                 <label>Player A</label>
                 <input type="text" id="pa-name" placeholder="Name">
-                <select id="pa-gender">
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="nonbinary">Non-Binary</option>
-                </select>
+                <select id="pa-gender"><option value="male">Male</option><option value="female">Female</option><option value="nonbinary">Non-Binary</option></select>
             </div>
             <div class="form-group">
                 <label>Player B</label>
                 <input type="text" id="pb-name" placeholder="Name">
-                <select id="pb-gender">
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="nonbinary">Non-Binary</option>
-                </select>
+                <select id="pb-gender"><option value="male">Male</option><option value="female">Female</option><option value="nonbinary">Non-Binary</option></select>
             </div>
             <div class="form-group">
-                <label>Rounds / Veto Limits</label>
+                <label>Session Limits</label>
                 <input type="number" id="setup-rounds" value="10" placeholder="Total Rounds">
                 <input type="number" id="setup-vetos" value="3" placeholder="Vetos Allowed">
             </div>
@@ -115,9 +107,7 @@
                 <div id="phase-name" style="color:var(--primary); font-weight: 800; text-transform: uppercase; margin-bottom:5px;">Ready</div>
                 <div class="timer-val" id="timer-display">00:00</div>
             </div>
-
             <div class="task-card" id="task-text">...</div>
-
             <div id="game-controls">
                 <button class="btn btn-primary" id="timer-btn" onclick="Engine.triggerPhase()">Start Task</button>
                 <div class="grid-3" id="resolution-btns" style="display:none; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -138,11 +128,28 @@
 
 <script>
     const Engine = {
-        inventory: JSON.parse(localStorage.getItem('tm_v8_inv')) || { 
+        inventory: JSON.parse(localStorage.getItem('tm_vFinal_inv')) || { 
             Restraint: [], Impact: [], Sensory: [], Toy: [], Gag: [], Blindfold: [], Furniture: [], Clothing: [] 
         },
-        customTasks: JSON.parse(localStorage.getItem('tm_v8_tasks')) || [],
-        prizes: JSON.parse(localStorage.getItem('tm_v8_prizes')) || [],
+        
+        // ADDED 5 INITIAL TASKS
+        customTasks: JSON.parse(localStorage.getItem('tm_vFinal_tasks')) || [
+            { text: "{dom} secures {sub} using [Restraint] while applying [Sensory] stimulation for [Time]. {sub} must remain perfectly still.", time: 300 },
+            { text: "{sub} is fitted with [Blindfold] and [Gag]. {dom} will then use [Impact] sporadically for [Time].", time: 480 },
+            { text: "{dom} commands {sub} to assume a position on the [Furniture]. {sub} must endure [Toy] play for [Time] without vocalizing.", time: 600 },
+            { text: "{dom} selects [Clothing] for {sub} to wear. Once dressed, {sub} must undergo [Impact] therapy for [Time].", time: 240 },
+            { text: "For [Time], {dom} will alternate between [Sensory] and [Impact] while {sub} is restricted by [Restraint].", time: 900 }
+        ],
+
+        // ADDED 5 INITIAL PRIZES
+        prizes: JSON.parse(localStorage.getItem('tm_vFinal_prizes')) || [
+            "Full Body Massage (No Time Limit)",
+            "A Week of Total Command",
+            "Special Dinner & Drink of Choice",
+            "Exemption from Household Chores for 3 Days",
+            "One Custom Fantasy Realized"
+        ],
+
         state: { pa: {n:'', s:0, g:''}, pb: {n:'', s:0, g:''}, dom: null, sub: null, round: 1, totalRounds: 10, timer: null, currentTask: null, vetos: 3, isPaused: false, timeLeft: 0 },
 
         init() {
@@ -183,26 +190,21 @@
         },
         removePrize(i) { this.prizes.splice(i, 1); this.save(); this.renderPrizes(); },
         save() {
-            localStorage.setItem('tm_v8_inv', JSON.stringify(this.inventory));
-            localStorage.setItem('tm_v8_tasks', JSON.stringify(this.customTasks));
-            localStorage.setItem('tm_v8_prizes', JSON.stringify(this.prizes));
+            localStorage.setItem('tm_vFinal_inv', JSON.stringify(this.inventory));
+            localStorage.setItem('tm_vFinal_tasks', JSON.stringify(this.customTasks));
+            localStorage.setItem('tm_vFinal_prizes', JSON.stringify(this.prizes));
         },
 
         start() {
             this.state.pa.n = document.getElementById('pa-name').value || "Player A";
-            this.state.pa.g = document.getElementById('pa-gender').value;
             this.state.pb.n = document.getElementById('pb-name').value || "Player B";
-            this.state.pb.g = document.getElementById('pb-gender').value;
             this.state.totalRounds = parseInt(document.getElementById('setup-rounds').value) || 10;
             this.state.vetos = parseInt(document.getElementById('setup-vetos').value) || 3;
-            
             document.getElementById('label-pa').innerText = this.state.pa.n;
             document.getElementById('label-pb').innerText = this.state.pb.n;
             document.getElementById('ui-vetos').innerText = this.state.vetos;
-            
             if(Math.random() > 0.5) { this.state.dom = this.state.pa; this.state.sub = this.state.pb; } 
             else { this.state.dom = this.state.pb; this.state.sub = this.state.pa; }
-            
             document.getElementById('setup-screen').style.display = 'none';
             document.getElementById('game-screen').style.display = 'block';
             this.drawTask();
@@ -211,14 +213,11 @@
         drawTask() {
             if(this.state.round > this.state.totalRounds) { return this.endSession(); }
             this.state.isPaused = false; clearInterval(this.state.timer);
-            const pool = this.customTasks.length > 0 ? this.customTasks : [{text: "{dom} Blindfolds {sub} with [Blindfold] and applies [Gag] to gag {sub} then ties their wrists behind their back and ties their ankles togther pulling them into a strict hogtie using [Restraint]. [Sub] must remain still for [Time] while [Dom] uses [Sensory] without making a sound or moving.", time: 180}]; this.state.currentTask = pool[Math.floor(Math.random() * pool.length)];
-            this.state.currentTask = pool[Math.floor(Math.random() * pool.length)];
-            
+            this.state.currentTask = this.customTasks[Math.floor(Math.random() * this.customTasks.length)];
             let finalHtml = this.state.currentTask.text
                 .replace(/{dom}/g, `<span style="color:var(--primary); font-weight:800">${this.state.dom.n}</span>`)
                 .replace(/{sub}/g, `<span style="color:var(--primary); font-weight:800">${this.state.sub.n}</span>`)
                 .replace(/\[Time\]/g, this.fmt(this.state.currentTask.time));
-
             Object.keys(this.inventory).forEach(cat => {
                 const activeItems = this.inventory[cat].filter(item => item.active);
                 const placeholder = `[${cat}]`;
@@ -227,7 +226,6 @@
                     finalHtml = finalHtml.split(placeholder).join(`<span class="item-highlight">${chosenItem}</span>`);
                 }
             });
-
             document.getElementById('task-text').innerHTML = `<div>${finalHtml}</div>`;
             document.getElementById('current-dom-name').innerText = this.state.dom.n;
             document.getElementById('timer-display').innerText = this.fmt(this.state.currentTask.time);
@@ -257,11 +255,8 @@
         },
 
         resolve(success) {
-            if(success) {
-                this.state.sub.s += 1;
-                let temp = this.state.dom; this.state.dom = this.state.sub; this.state.sub = temp;
-                alert(`SUCCESS! Roles Swapped.`);
-            } else { this.state.sub.s -= 1; alert(`FAILURE! Subversive -1 point.`); }
+            if(success) { this.state.sub.s += 1; let temp = this.state.dom; this.state.dom = this.state.sub; this.state.sub = temp; alert(`SUCCESS! +1 point and Swap.`);
+            } else { this.state.sub.s -= 1; alert(`FAILURE! -1 point.`); }
             this.updateScores(); this.state.round++;
             document.getElementById('resolution-btns').style.display = 'none';
             document.getElementById('next-btn').style.display = 'block';
@@ -269,14 +264,14 @@
 
         togglePause() { this.state.isPaused = !this.state.isPaused; document.getElementById('pause-btn').innerText = this.state.isPaused ? "RESUME" : "PAUSE"; },
         veto() { if(this.state.vetos > 0) { this.state.vetos--; document.getElementById('ui-vetos').innerText = this.state.vetos; this.drawTask(); } },
-        safeWord() { this.state.sub.s -= 5; this.updateScores(); this.state.isPaused = true; alert("SAFE WORD: Subversive -5 pts. Session Paused."); },
+        safeWord() { this.state.sub.s -= 5; this.updateScores(); this.state.isPaused = true; alert("SAFE WORD: Sub -5 pts. Paused."); },
         redCard() { clearInterval(this.state.timer); document.body.innerHTML = "<div style='color:white; text-align:center; padding:50px;'><h1>EMERGENCY STOP</h1><button onclick='location.reload()'>Restart</button></div>"; },
         
         endSession() {
             let winner = this.state.pa.s > this.state.pb.s ? this.state.pa : (this.state.pb.s > this.state.pa.s ? this.state.pb : null);
             let prize = this.prizes.length > 0 ? this.prizes[Math.floor(Math.random()*this.prizes.length)] : "A night of choice";
             let msg = winner ? `${winner.n} wins the session!` : "It's a draw!";
-            document.getElementById('game-screen').innerHTML = `<div class='panel' style='text-align:center'><h1>Session Complete</h1><h2>${msg}</h2><p>Reward: <strong>${prize}</strong></p><button class='btn btn-primary' onclick='location.reload()'>New Session</button></div>`;
+            document.getElementById('game-screen').innerHTML = `<div class='panel' style='text-align:center'><h1>Session Complete</h1><h2>${msg}</h2><p>Winner's Reward: <strong>${prize}</strong></p><button class='btn btn-primary' onclick='location.reload()'>New Session</button></div>`;
         },
 
         updateScores() { document.getElementById('score-pa').innerText = this.state.pa.s; document.getElementById('score-pb').innerText = this.state.pb.s; },
