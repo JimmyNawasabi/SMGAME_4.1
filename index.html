@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Master: Final Stable Edition</title>
+    <title>Task Master: Unlimited Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
         :root {
@@ -54,9 +54,8 @@
                 <select id="pb-gender"><option value="male">Male</option><option value="female">Female</option><option value="nonbinary">Non-Binary</option></select>
             </div>
             <div class="form-group">
-                <label>Session Limits</label>
-                <input type="number" id="setup-rounds" value="10">
-                <input type="number" id="setup-vetos" value="3">
+                <label>Session Rounds</label>
+                <input type="number" id="setup-rounds" value="10" min="1">
             </div>
         </div>
 
@@ -68,7 +67,7 @@
                 <h3>2. Task Creator</h3>
                 <div class="db-box">
                     <textarea id="new-task-text" placeholder="Tokens: {dom}, {sub}, [Restraint], [Impact], [Sensory], [Toy], [Gag], [Blindfold], [Furniture], [Clothing]" rows="4"></textarea>
-                    <input type="number" id="new-task-time" placeholder="Seconds (e.g. 300)">
+                    <input type="number" id="new-task-time" placeholder="Seconds">
                     <button class="btn btn-outline" onclick="Engine.saveCustomTask()">Save Task</button>
                 </div>
             </div>
@@ -92,7 +91,7 @@
                 <div style="text-align:center"><label id="label-pb">Player B</label><div class="score-num" id="score-pb">0</div></div>
             </div>
             <div style="text-align: center; font-weight: 800; color: var(--gold); margin-bottom: 10px; text-transform: uppercase;">
-                Dom: <span id="current-dom-name">?</span> | Vetos: <span id="ui-vetos">3</span>
+                Dom: <span id="current-dom-name">?</span> | <span style="color:var(--success)">Vetos Unlimited</span>
             </div>
             <div class="timer-box">
                 <div id="phase-name" style="color:var(--primary); font-weight: 800; text-transform: uppercase; margin-bottom:5px;">Ready</div>
@@ -106,7 +105,7 @@
                     <button class="btn btn-danger" onclick="Engine.resolve(false)">Failure (-1 & Stay)</button>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px;">
-                    <button class="btn btn-outline" onclick="Engine.veto()">Veto</button>
+                    <button class="btn btn-outline" onclick="Engine.vetoTask()">Veto Task</button>
                     <button class="btn btn-warning" id="pause-btn" onclick="Engine.togglePause()">Pause</button>
                     <button class="btn btn-danger" onclick="Engine.safeWord()">SAFE WORD (-5)</button>
                 </div>
@@ -119,20 +118,20 @@
 
 <script>
     const Engine = {
-        inventory: JSON.parse(localStorage.getItem('tm_vFinal_inv')) || { 
+        inventory: JSON.parse(localStorage.getItem('tm_vX_inv')) || { 
             Restraint: [], Impact: [], Sensory: [], Toy: [], Gag: [], Blindfold: [], Furniture: [], Clothing: [] 
         },
-        customTasks: JSON.parse(localStorage.getItem('tm_vFinal_tasks')) || [
+        customTasks: JSON.parse(localStorage.getItem('tm_vX_tasks')) || [
             { text: "{dom} secures {sub} using [Restraint] while applying [Sensory] stimulation for [Time].", time: 300 },
             { text: "{sub} is fitted with [Blindfold] and [Gag]. {dom} will then use [Impact] sporadically for [Time].", time: 480 },
             { text: "{dom} commands {sub} to assume a position on the [Furniture] for [Time].", time: 600 },
             { text: "{dom} selects [Clothing] for {sub}. Once dressed, {sub} must undergo [Impact] for [Time].", time: 240 },
             { text: "For [Time], {dom} will alternate between [Sensory] and [Impact] while {sub} is in [Restraint].", time: 900 }
         ],
-        prizes: JSON.parse(localStorage.getItem('tm_vFinal_prizes')) || [
+        prizes: JSON.parse(localStorage.getItem('tm_vX_prizes')) || [
             "Full Body Massage", "A Week of Command", "Special Dinner", "Exemption from Chores", "One Fantasy Realized"
         ],
-        state: { pa: {n:'', s:0}, pb: {n:'', s:0}, dom: null, sub: null, round: 1, totalRounds: 10, timer: null, currentTask: null, vetos: 3, isPaused: false, timeLeft: 0 },
+        state: { pa: {n:'', s:0}, pb: {n:'', s:0}, dom: null, sub: null, round: 1, totalRounds: 10, timer: null, currentTask: null, currentPrize: null, isPaused: false, timeLeft: 0 },
 
         init() {
             const ui = document.getElementById('inventory-ui');
@@ -172,19 +171,18 @@
         },
         removePrize(i) { this.prizes.splice(i, 1); this.save(); this.renderPrizes(); },
         save() {
-            localStorage.setItem('tm_vFinal_inv', JSON.stringify(this.inventory));
-            localStorage.setItem('tm_vFinal_tasks', JSON.stringify(this.customTasks));
-            localStorage.setItem('tm_vFinal_prizes', JSON.stringify(this.prizes));
+            localStorage.setItem('tm_vX_inv', JSON.stringify(this.inventory));
+            localStorage.setItem('tm_vX_tasks', JSON.stringify(this.customTasks));
+            localStorage.setItem('tm_vX_prizes', JSON.stringify(this.prizes));
         },
 
         start() {
             this.state.pa.n = document.getElementById('pa-name').value || "Player A";
             this.state.pb.n = document.getElementById('pb-name').value || "Player B";
             this.state.totalRounds = parseInt(document.getElementById('setup-rounds').value) || 10;
-            this.state.vetos = parseInt(document.getElementById('setup-vetos').value) || 3;
+            this.state.round = 1;
             document.getElementById('label-pa').innerText = this.state.pa.n;
             document.getElementById('label-pb').innerText = this.state.pb.n;
-            document.getElementById('ui-vetos').innerText = this.state.vetos;
             if(Math.random() > 0.5) { this.state.dom = this.state.pa; this.state.sub = this.state.pb; } 
             else { this.state.dom = this.state.pb; this.state.sub = this.state.pa; }
             document.getElementById('setup-screen').style.display = 'none';
@@ -193,11 +191,9 @@
         },
 
         drawTask() {
-            if(this.state.round > this.state.totalRounds) { return this.endSession(); }
             this.state.isPaused = false; clearInterval(this.state.timer);
-            
             if(this.customTasks.length === 0) {
-                this.state.currentTask = { text: "{dom} applies 10 minutes of choice to {sub}.", time: 600 };
+                this.state.currentTask = { text: "No more tasks in database. Add more or refresh.", time: 0 };
             } else {
                 this.state.currentTask = this.customTasks[Math.floor(Math.random() * this.customTasks.length)];
             }
@@ -223,12 +219,10 @@
             document.getElementById('timer-btn').style.display = 'block';
             document.getElementById('next-btn').style.display = 'none';
             document.getElementById('resolution-btns').style.display = 'none';
-            document.getElementById('phase-name').innerText = "Trial Assigned";
         },
 
         triggerPhase() {
             this.runTimer(this.state.currentTask.time);
-            document.getElementById('phase-name').innerText = "Trial Active";
             document.getElementById('timer-btn').style.display = 'none';
             document.getElementById('resolution-btns').style.display = 'grid';
         },
@@ -239,46 +233,65 @@
                 if(!this.state.isPaused) {
                     this.state.timeLeft--;
                     document.getElementById('timer-display').innerText = this.fmt(this.state.timeLeft);
-                    if(this.state.timeLeft <= 0) { clearInterval(this.state.timer); document.getElementById('timer-display').innerText = "00:00"; }
+                    if(this.state.timeLeft <= 0) { clearInterval(this.state.timer); }
                 }
             }, 1000);
         },
 
         resolve(success) {
-            if(success) { this.state.sub.s += 1; let temp = this.state.dom; this.state.dom = this.state.sub; this.state.sub = temp; 
+            if(success) { 
+                this.state.sub.s += 1; 
+                let temp = this.state.dom; this.state.dom = this.state.sub; this.state.sub = temp; 
             } else { this.state.sub.s -= 1; }
-            this.updateScores(); this.state.round++;
-            document.getElementById('resolution-btns').style.display = 'none';
-            document.getElementById('next-btn').style.display = 'block';
+            this.updateScores();
+            if(this.state.round >= this.state.totalRounds) {
+                this.endSession();
+            } else {
+                this.state.round++;
+                document.getElementById('resolution-btns').style.display = 'none';
+                document.getElementById('next-btn').style.display = 'block';
+            }
+        },
+
+        vetoTask() {
+            const idx = this.customTasks.findIndex(t => t.text === this.state.currentTask.text);
+            if (idx !== -1) { this.customTasks.splice(idx, 1); this.save(); }
+            this.drawTask();
+        },
+
+        vetoPrize() {
+            const idx = this.prizes.indexOf(this.state.currentPrize);
+            if (idx !== -1) { this.prizes.splice(idx, 1); this.save(); }
+            this.endSession();
         },
 
         togglePause() { this.state.isPaused = !this.state.isPaused; document.getElementById('pause-btn').innerText = this.state.isPaused ? "RESUME" : "PAUSE"; },
-        
-        veto() { 
-            if(this.state.vetos > 0 && this.state.currentTask) { 
-                const taskIndex = this.customTasks.findIndex(t => t.text === this.state.currentTask.text);
-                if (taskIndex !== -1) { this.customTasks.splice(taskIndex, 1); this.save(); }
-                this.state.vetos--; 
-                document.getElementById('ui-vetos').innerText = this.state.vetos; 
-                this.drawTask();
-            } 
-        },
-
-        safeWord() { this.state.sub.s -= 5; this.updateScores(); this.state.isPaused = true; alert("SAFE WORD: Subversive -5 pts. Session Paused."); },
+        safeWord() { this.state.sub.s -= 5; this.updateScores(); this.state.isPaused = true; alert("SAFE WORD: Subversive -5 pts. Paused."); },
         redCard() { clearInterval(this.state.timer); document.body.innerHTML = "<div style='color:white; text-align:center; padding:50px;'><h1>EMERGENCY STOP</h1><button onclick='location.reload()'>Restart</button></div>"; },
         
         endSession() {
             let winner = this.state.pa.s > this.state.pb.s ? this.state.pa : (this.state.pb.s > this.state.pa.s ? this.state.pb : null);
-            let prize = this.prizes.length > 0 ? this.prizes[Math.floor(Math.random()*this.prizes.length)] : "A night of choice";
+            this.state.currentPrize = this.prizes.length > 0 ? this.prizes[Math.floor(Math.random()*this.prizes.length)] : "A night of choice";
             let msg = winner ? `${winner.n} wins the session!` : "It's a draw!";
-            document.getElementById('game-screen').innerHTML = `<div class='panel' style='text-align:center'><h1>Session Complete</h1><h2>${msg}</h2><p>Winner's Reward: <strong>${prize}</strong></p><button class='btn btn-primary' onclick='location.reload()'>New Session</button></div>`;
+            
+            document.getElementById('game-screen').innerHTML = `
+                <div class='panel' style='text-align:center'>
+                    <h1>Session Complete</h1>
+                    <div class="score-display">
+                        <div><label>${this.state.pa.n}</label><div class="score-num">${this.state.pa.s}</div></div>
+                        <div><label>${this.state.pb.n}</label><div class="score-num">${this.state.pb.s}</div></div>
+                    </div>
+                    <h2>${msg}</h2>
+                    <div class="task-card">Reward: <br><strong>${this.state.currentPrize}</strong></div>
+                    <div class="grid-3" style="grid-template-columns: 1fr 1fr; gap:10px;">
+                        <button class='btn btn-outline' onclick='Engine.vetoPrize()'>Veto Prize</button>
+                        <button class='btn btn-primary' onclick='location.reload()'>New Session</button>
+                    </div>
+                </div>`;
         },
 
         updateScores() { document.getElementById('score-pa').innerText = this.state.pa.s; document.getElementById('score-pb').innerText = this.state.pb.s; },
-        fmt: (s) => {
-            let val = Math.abs(s);
-            return `${Math.floor(val/60)}:${(val%60).toString().padStart(2,'0')}`;
-        }
+        fmt: (s) => `${Math.floor(Math.abs(s)/60)}:${(Math.abs(s)%60).toString().padStart(2,'0')}`
     };
     Engine.init();
 </script>
