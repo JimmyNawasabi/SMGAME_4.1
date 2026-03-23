@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Master: Final Edition</title>
+    <title>Task Master: Final Stable Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
         :root {
@@ -18,27 +18,18 @@
         .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
         label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 700; text-transform: uppercase; }
         input, select, textarea { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); box-sizing: border-box; font-family: inherit; margin-bottom: 10px; }
-        
         .btn { padding: 14px; border: none; border-radius: 6px; cursor: pointer; font-weight: 800; width: 100%; text-transform: uppercase; transition: 0.2s; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-gold { background: var(--gold); color: black; }
         .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
         .btn-danger { background: var(--accent); color: white; }
         .btn-warning { background: #ca8a04; color: white; }
-
         .inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .db-box { background: #111; padding: 12px; border-radius: 8px; border: 1px solid var(--border); }
         .chip { display: inline-flex; align-items: center; background: var(--border); padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; margin: 3px; border: 2px solid transparent; cursor: pointer; }
         .chip.active { border-color: var(--primary); background: #2e1a4d; }
-
-        .task-card { 
-            font-size: 1.25rem; line-height: 1.6; min-height: 180px; max-height: 350px; overflow-y: auto;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; padding: 30px; background: #0a0a0a; border-radius: 8px; 
-            border-left: 8px solid var(--primary); margin-bottom: 20px; box-sizing: border-box;
-        }
+        .task-card { font-size: 1.25rem; line-height: 1.6; min-height: 180px; max-height: 350px; overflow-y: auto; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 30px; background: #0a0a0a; border-radius: 8px; border-left: 8px solid var(--primary); margin-bottom: 20px; box-sizing: border-box; }
         .item-highlight { color: var(--gold); font-weight: 800; border-bottom: 1px dashed var(--gold); }
-
         #game-screen { display: none; }
         .timer-box { text-align: center; margin: 20px 0; padding: 20px; background: #000; border-radius: 8px; border: 3px solid var(--gold); }
         .timer-val { font-size: 5rem; font-weight: 800; color: var(--gold); font-variant-numeric: tabular-nums; line-height: 1; }
@@ -64,8 +55,8 @@
             </div>
             <div class="form-group">
                 <label>Session Limits</label>
-                <input type="number" id="setup-rounds" value="10" placeholder="Total Rounds">
-                <input type="number" id="setup-vetos" value="3" placeholder="Vetos Allowed">
+                <input type="number" id="setup-rounds" value="10">
+                <input type="number" id="setup-vetos" value="3">
             </div>
         </div>
 
@@ -77,7 +68,7 @@
                 <h3>2. Task Creator</h3>
                 <div class="db-box">
                     <textarea id="new-task-text" placeholder="Tokens: {dom}, {sub}, [Restraint], [Impact], [Sensory], [Toy], [Gag], [Blindfold], [Furniture], [Clothing]" rows="4"></textarea>
-                    <input type="number" id="new-task-time" placeholder="Duration (Seconds)">
+                    <input type="number" id="new-task-time" placeholder="Seconds (e.g. 300)">
                     <button class="btn btn-outline" onclick="Engine.saveCustomTask()">Save Task</button>
                 </div>
             </div>
@@ -107,7 +98,7 @@
                 <div id="phase-name" style="color:var(--primary); font-weight: 800; text-transform: uppercase; margin-bottom:5px;">Ready</div>
                 <div class="timer-val" id="timer-display">00:00</div>
             </div>
-            <div class="task-card" id="task-text">...</div>
+            <div class="task-card" id="task-text">Loading...</div>
             <div id="game-controls">
                 <button class="btn btn-primary" id="timer-btn" onclick="Engine.triggerPhase()">Start Task</button>
                 <div class="grid-3" id="resolution-btns" style="display:none; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -131,26 +122,17 @@
         inventory: JSON.parse(localStorage.getItem('tm_vFinal_inv')) || { 
             Restraint: [], Impact: [], Sensory: [], Toy: [], Gag: [], Blindfold: [], Furniture: [], Clothing: [] 
         },
-        
-        // ADDED 5 INITIAL TASKS
         customTasks: JSON.parse(localStorage.getItem('tm_vFinal_tasks')) || [
-            { text: "{dom} secures {sub} using [Restraint] while applying [Sensory] stimulation for [Time]. {sub} must remain perfectly still.", time: 300 },
+            { text: "{dom} secures {sub} using [Restraint] while applying [Sensory] stimulation for [Time].", time: 300 },
             { text: "{sub} is fitted with [Blindfold] and [Gag]. {dom} will then use [Impact] sporadically for [Time].", time: 480 },
-            { text: "{dom} commands {sub} to assume a position on the [Furniture]. {sub} must endure [Toy] play for [Time] without vocalizing.", time: 600 },
-            { text: "{dom} selects [Clothing] for {sub} to wear. Once dressed, {sub} must undergo [Impact] therapy for [Time].", time: 240 },
-            { text: "For [Time], {dom} will alternate between [Sensory] and [Impact] while {sub} is restricted by [Restraint].", time: 900 }
+            { text: "{dom} commands {sub} to assume a position on the [Furniture] for [Time].", time: 600 },
+            { text: "{dom} selects [Clothing] for {sub}. Once dressed, {sub} must undergo [Impact] for [Time].", time: 240 },
+            { text: "For [Time], {dom} will alternate between [Sensory] and [Impact] while {sub} is in [Restraint].", time: 900 }
         ],
-
-        // ADDED 5 INITIAL PRIZES
         prizes: JSON.parse(localStorage.getItem('tm_vFinal_prizes')) || [
-            "Full Body Massage (No Time Limit)",
-            "A Week of Total Command",
-            "Special Dinner & Drink of Choice",
-            "Exemption from Household Chores for 3 Days",
-            "One Custom Fantasy Realized"
+            "Full Body Massage", "A Week of Command", "Special Dinner", "Exemption from Chores", "One Fantasy Realized"
         ],
-
-        state: { pa: {n:'', s:0, g:''}, pb: {n:'', s:0, g:''}, dom: null, sub: null, round: 1, totalRounds: 10, timer: null, currentTask: null, vetos: 3, isPaused: false, timeLeft: 0 },
+        state: { pa: {n:'', s:0}, pb: {n:'', s:0}, dom: null, sub: null, round: 1, totalRounds: 10, timer: null, currentTask: null, vetos: 3, isPaused: false, timeLeft: 0 },
 
         init() {
             const ui = document.getElementById('inventory-ui');
@@ -213,11 +195,18 @@
         drawTask() {
             if(this.state.round > this.state.totalRounds) { return this.endSession(); }
             this.state.isPaused = false; clearInterval(this.state.timer);
-            this.state.currentTask = this.customTasks[Math.floor(Math.random() * this.customTasks.length)];
+            
+            if(this.customTasks.length === 0) {
+                this.state.currentTask = { text: "{dom} applies 10 minutes of choice to {sub}.", time: 600 };
+            } else {
+                this.state.currentTask = this.customTasks[Math.floor(Math.random() * this.customTasks.length)];
+            }
+            
             let finalHtml = this.state.currentTask.text
                 .replace(/{dom}/g, `<span style="color:var(--primary); font-weight:800">${this.state.dom.n}</span>`)
                 .replace(/{sub}/g, `<span style="color:var(--primary); font-weight:800">${this.state.sub.n}</span>`)
                 .replace(/\[Time\]/g, this.fmt(this.state.currentTask.time));
+
             Object.keys(this.inventory).forEach(cat => {
                 const activeItems = this.inventory[cat].filter(item => item.active);
                 const placeholder = `[${cat}]`;
@@ -226,6 +215,7 @@
                     finalHtml = finalHtml.split(placeholder).join(`<span class="item-highlight">${chosenItem}</span>`);
                 }
             });
+
             document.getElementById('task-text').innerHTML = `<div>${finalHtml}</div>`;
             document.getElementById('current-dom-name').innerText = this.state.dom.n;
             document.getElementById('timer-display').innerText = this.fmt(this.state.currentTask.time);
@@ -255,39 +245,26 @@
         },
 
         resolve(success) {
-            if(success) { this.state.sub.s += 1; let temp = this.state.dom; this.state.dom = this.state.sub; this.state.sub = temp; alert(`SUCCESS! +1 point and Swap.`);
-            } else { this.state.sub.s -= 1; alert(`FAILURE! -1 point.`); }
+            if(success) { this.state.sub.s += 1; let temp = this.state.dom; this.state.dom = this.state.sub; this.state.sub = temp; 
+            } else { this.state.sub.s -= 1; }
             this.updateScores(); this.state.round++;
             document.getElementById('resolution-btns').style.display = 'none';
             document.getElementById('next-btn').style.display = 'block';
         },
 
         togglePause() { this.state.isPaused = !this.state.isPaused; document.getElementById('pause-btn').innerText = this.state.isPaused ? "RESUME" : "PAUSE"; },
+        
         veto() { 
             if(this.state.vetos > 0 && this.state.currentTask) { 
-                // 1. Find the current task in the master list
                 const taskIndex = this.customTasks.findIndex(t => t.text === this.state.currentTask.text);
-                
-                // 2. If found, remove it permanently from the array
-                if (taskIndex !== -1) {
-                    this.customTasks.splice(taskIndex, 1);
-                    this.save(); // Save the deletion to LocalStorage
-                }
-
-                // 3. Deduct the veto point and update UI
+                if (taskIndex !== -1) { this.customTasks.splice(taskIndex, 1); this.save(); }
                 this.state.vetos--; 
                 document.getElementById('ui-vetos').innerText = this.state.vetos; 
-
-                // 4. Draw a new task or alert if empty
-                if (this.customTasks.length > 0) {
-                    this.drawTask(); 
-                } else {
-                    document.getElementById('task-text').innerHTML = "<div style='color:var(--accent)'>DATABASE EMPTY: NO TASKS REMAIN.</div>";
-                    document.getElementById('timer-btn').style.display = 'none';
-                }
+                this.drawTask();
             } 
         },
-        safeWord() { this.state.sub.s -= 5; this.updateScores(); this.state.isPaused = true; alert("SAFE WORD: Sub -5 pts. Paused."); },
+
+        safeWord() { this.state.sub.s -= 5; this.updateScores(); this.state.isPaused = true; alert("SAFE WORD: Subversive -5 pts. Session Paused."); },
         redCard() { clearInterval(this.state.timer); document.body.innerHTML = "<div style='color:white; text-align:center; padding:50px;'><h1>EMERGENCY STOP</h1><button onclick='location.reload()'>Restart</button></div>"; },
         
         endSession() {
@@ -298,7 +275,10 @@
         },
 
         updateScores() { document.getElementById('score-pa').innerText = this.state.pa.s; document.getElementById('score-pb').innerText = this.state.pb.s; },
-        fmt: (s) => `${Math.floor(s/60)}:${(Math.abs(s)%60).toString().padStart(2,'0')}`
+        fmt: (s) => {
+            let val = Math.abs(s);
+            return `${Math.floor(val/60)}:${(val%60).toString().padStart(2,'0')}`;
+        }
     };
     Engine.init();
 </script>
